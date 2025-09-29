@@ -1,0 +1,90 @@
+.contrato {
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.contrato .logo {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.contrato .logo img {
+  width: 80%;
+}
+
+.contrato .titulo {
+  text-align: center;
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+.contrato .conteudo {
+  margin: 16px 64px;
+}
+
+.contrato p {
+  text-indent: 24px;
+  margin-bottom: 12px;
+}
+
+.contrato .assinatura-data {
+  margin-top: 32px;
+  text-indent: 52px;
+}
+
+.contrato .assinaturas {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 40px;
+  text-align: center;
+}
+
+/* Estilos para modo de edição */
+.editing-mode [data-editable="true"]:hover {
+  background-color: #f0f7ff !important;
+  outline: 1px dashed #2196f3;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .contrato-container,
+  .contrato-container * {
+    visibility: visible;
+  }
+
+  .contrato-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Estilos específicos para melhorar a aparência impressa */
+  .page-break {
+    page-break-after: always;
+  }
+
+  /* Garantir que as imagens sejam exibidas na impressão */
+  img {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Melhorar a legibilidade do texto na impressão */
+  p,
+  label {
+    color: black !important;
+    font-family: "Times New Roman", serif !important;
+  }
+}
