@@ -172,22 +172,20 @@ const Cliente = () => {
       setLoading(true);
       try {
         const response = await atualizarCliente(
-          clienteEditando.id,
+          clienteEditando.id, // ID como PRIMEIRO parâmetro
           nomeCompleto,
+          "", // senha (vazia se não for alterar)
           email,
-          telefone,
-          rg,
-          cnh,
+          "", // permissao (vazia se não for usar)
+          "", // oab (vazia se não for usar)
           profissao,
           cpf,
           cep,
           cidade,
           estado,
           rua,
-          numero,
-          bairro
+          numero
         );
-
         const usuariosAtualizados = clientesCadastrados.map((usuario) =>
           usuario.id === clienteEditando.id
             ? {

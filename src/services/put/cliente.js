@@ -2,6 +2,7 @@ import httpsInstance from "../url";
 import CustomToast from "../../components/toast";
 
 export const atualizarCliente = async (
+  id, // PRIMEIRO parâmetro
   nome,
   senha,
   email,
@@ -13,8 +14,7 @@ export const atualizarCliente = async (
   cidade,
   estado,
   rua,
-  numero,
-  id
+  numero
 ) => {
   const https = httpsInstance();
   const token = sessionStorage.getItem("token");
@@ -40,7 +40,7 @@ export const atualizarCliente = async (
       numero,
     };
 
-    const response = await https.put(`/users/${id}`, payload, {
+    const response = await https.put(`/clientes/${id}`, payload, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

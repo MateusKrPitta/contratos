@@ -190,15 +190,17 @@ const Usuario = () => {
         bairro
       );
 
+      // Atualizar a lista de usuários após o cadastro
+      const usuariosAtualizados = await buscarUsuarios();
+      setUsuariosCadastrados(usuariosAtualizados.data || []);
+
       FecharCadastroUsuario();
-      buscarUsuarios();
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
     } finally {
       setLoading(false);
     }
   };
-
   const handleSalvarEdicao = async () => {
     setLoading(true);
 
@@ -488,7 +490,7 @@ const Usuario = () => {
                       onChange={(e) => setProfissao(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -506,7 +508,7 @@ const Usuario = () => {
                       icon={<ArticleOutlined />}
                       iconSize={24}
                       labelSize="small"
-                      width="47%"
+                      width="46%"
                       autoComplete="off"
                     />
                     <TextField
@@ -525,7 +527,7 @@ const Usuario = () => {
                       }}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -541,7 +543,7 @@ const Usuario = () => {
                       icon={<LocationCity />}
                       iconSize={24}
                       labelSize="small"
-                      width="49%"
+                      width="46%"
                     />
 
                     <TextField
@@ -554,7 +556,7 @@ const Usuario = () => {
                       onChange={(e) => setCidade(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -575,7 +577,7 @@ const Usuario = () => {
                       onChange={(e) => setEstado(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "46%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -585,57 +587,6 @@ const Usuario = () => {
                         ),
                       }}
                     />
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      label="Rua"
-                      name="Rua"
-                      value={rua}
-                      onChange={(e) => setRua(e.target.value)}
-                      autoComplete="off"
-                      sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <LocationOnOutlined />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                    <TextField
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      label="Número"
-                      name="Número"
-                      value={numero}
-                      onChange={(e) => setNumero(e.target.value)}
-                      autoComplete="off"
-                      sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "25%" },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Numbers />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-
-                    <MaskedFieldPhone
-                      value={telefone}
-                      onChange={(e) => setTelefone(e.target.value)}
-                      icon={<Phone />}
-                      iconSize={24}
-                      labelSize="small"
-                      width="49%"
-                      autoComplete="off"
-                    />
-
                     <TextField
                       fullWidth
                       variant="outlined"
@@ -660,6 +611,57 @@ const Usuario = () => {
                           </InputAdornment>
                         ),
                       }}
+                    />
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      label="Número"
+                      name="Número"
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
+                      type="number"
+                      autoComplete="off"
+                      sx={{
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "25%" },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Numbers />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      label="Rua"
+                      name="Rua"
+                      value={rua}
+                      onChange={(e) => setRua(e.target.value)}
+                      autoComplete="off"
+                      sx={{
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "71%" },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LocationOnOutlined />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+
+                    <MaskedFieldPhone
+                      value={telefone}
+                      onChange={(e) => setTelefone(e.target.value)}
+                      icon={<Phone />}
+                      iconSize={24}
+                      labelSize="small"
+                      width="49%"
+                      autoComplete="off"
                     />
                   </div>
 
