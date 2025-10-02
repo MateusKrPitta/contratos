@@ -12,6 +12,8 @@ const MaskedFieldPhone = ({
   labelSize = "small",
   width = "100%",
   autoComplete = "off",
+  inputRef, // Nova prop
+  onKeyDown, // Nova prop
 }) => {
   const mask = [
     "(",
@@ -40,7 +42,13 @@ const MaskedFieldPhone = ({
       render={(ref, props) => (
         <TextField
           {...props}
-          inputRef={ref}
+          inputRef={(element) => {
+            ref(element);
+            if (inputRef) {
+              inputRef(element);
+            }
+          }}
+          onKeyDown={onKeyDown}
           variant="outlined"
           size="small"
           fullWidth

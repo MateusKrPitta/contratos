@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Navbar from "../../../components/navbars/header";
 import HeaderPerfil from "../../../components/navbars/perfil";
 import ButtonComponent from "../../../components/button";
@@ -61,6 +61,31 @@ const Usuario = () => {
   const [bairro, setBairro] = useState("");
 
   const [usuariosCadastrados, setUsuariosCadastrados] = useState([]);
+
+  // Refs para os campos de input
+  const inputRefs = useRef([]);
+
+  // Função para focar no próximo campo
+  const focusNextInput = (currentIndex) => {
+    const nextIndex = currentIndex + 1;
+    if (inputRefs.current[nextIndex]) {
+      inputRefs.current[nextIndex].focus();
+    }
+  };
+
+  // Função para lidar com a tecla Enter
+  const handleKeyDown = (index) => (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      focusNextInput(index);
+    }
+  };
+
+  // Registrar input no array de refs
+  const registerInput = (index, element) => {
+    inputRefs.current[index] = element;
+  };
+
   const usuariosFiltrados = usuariosCadastrados.filter(
     (usuario) =>
       usuario.nome.toLowerCase().includes(pesquisar.toLowerCase()) ||
@@ -105,6 +130,7 @@ const Usuario = () => {
       permissao !== null
     );
   };
+
   const FecharCadastroUsuario = () => {
     setCadastroUsuario(false);
     setUsuarioEditando(null);
@@ -124,6 +150,8 @@ const Usuario = () => {
     setNumero("");
     setRg("");
     setBairro("");
+    // Limpar refs
+    inputRefs.current = [];
   };
 
   const EditarOpcao = (usuario) => {
@@ -164,6 +192,8 @@ const Usuario = () => {
     setNumero("");
     setRg("");
     setBairro("");
+    // Limpar refs
+    inputRefs.current = [];
   };
 
   const handleCadastrarUsuario = async () => {
@@ -201,6 +231,7 @@ const Usuario = () => {
       setLoading(false);
     }
   };
+
   const handleSalvarEdicao = async () => {
     setLoading(true);
 
@@ -289,9 +320,27 @@ const Usuario = () => {
     }
   };
 
+  // Focar no primeiro campo quando abrir os modais
+  useEffect(() => {
+    if (cadastroUsuario && inputRefs.current[0]) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [cadastroUsuario]);
+
+  useEffect(() => {
+    if (editando && inputRefs.current[0]) {
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 100);
+    }
+  }, [editando]);
+
   useEffect(() => {
     buscarUsuariosCadastradas();
   }, []);
+
   return (
     <div className="flex w-full ">
       <Navbar />
@@ -387,6 +436,8 @@ const Usuario = () => {
                 <div className="overflow-y-auto overflow-x-hidden max-h-[300px]">
                   <div className="mt-4 flex gap-3 flex-wrap">
                     <TextField
+                      inputRef={(el) => registerInput(0, el)}
+                      onKeyDown={handleKeyDown(0)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -407,6 +458,8 @@ const Usuario = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(1, el)}
+                      onKeyDown={handleKeyDown(1)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -427,6 +480,8 @@ const Usuario = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(2, el)}
+                      onKeyDown={handleKeyDown(2)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -448,6 +503,8 @@ const Usuario = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(3, el)}
+                      onKeyDown={handleKeyDown(3)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -473,6 +530,8 @@ const Usuario = () => {
                       <MenuItem value={3}>Visualizador</MenuItem>
                     </TextField>
                     <MaskedFieldOAB
+                      inputRef={(el) => registerInput(4, el)}
+                      onKeyDown={handleKeyDown(4)}
                       iconSize={18}
                       value={oab}
                       onChange={(e) => setOab(e.target.value)}
@@ -481,6 +540,8 @@ const Usuario = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(5, el)}
+                      onKeyDown={handleKeyDown(5)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -501,6 +562,8 @@ const Usuario = () => {
                       }}
                     />
                     <MaskedFieldCpf
+                      inputRef={(el) => registerInput(6, el)}
+                      onKeyDown={handleKeyDown(6)}
                       type="cpf"
                       label="CPF"
                       value={cpf}
@@ -512,6 +575,8 @@ const Usuario = () => {
                       autoComplete="off"
                     />
                     <TextField
+                      inputRef={(el) => registerInput(7, el)}
+                      onKeyDown={handleKeyDown(7)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -538,6 +603,8 @@ const Usuario = () => {
                       }}
                     />
                     <MaskedFieldCep
+                      inputRef={(el) => registerInput(8, el)}
+                      onKeyDown={handleKeyDown(8)}
                       value={cep}
                       onChange={(e) => setCep(e.target.value)}
                       icon={<LocationCity />}
@@ -547,6 +614,8 @@ const Usuario = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(9, el)}
+                      onKeyDown={handleKeyDown(9)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -567,6 +636,8 @@ const Usuario = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(10, el)}
+                      onKeyDown={handleKeyDown(10)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -588,6 +659,8 @@ const Usuario = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(11, el)}
+                      onKeyDown={handleKeyDown(11)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -613,6 +686,8 @@ const Usuario = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(12, el)}
+                      onKeyDown={handleKeyDown(12)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -634,6 +709,8 @@ const Usuario = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(13, el)}
+                      onKeyDown={handleKeyDown(13)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -655,6 +732,8 @@ const Usuario = () => {
                     />
 
                     <MaskedFieldPhone
+                      inputRef={(el) => registerInput(14, el)}
+                      onKeyDown={handleKeyDown(14)}
                       value={telefone}
                       onChange={(e) => setTelefone(e.target.value)}
                       icon={<Phone />}
@@ -688,6 +767,8 @@ const Usuario = () => {
                   <div className="">
                     <div className="mt-4 flex gap-3 flex-wrap">
                       <TextField
+                        inputRef={(el) => registerInput(0, el)}
+                        onKeyDown={handleKeyDown(0)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -713,6 +794,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(1, el)}
+                        onKeyDown={handleKeyDown(1)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -738,6 +821,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(2, el)}
+                        onKeyDown={handleKeyDown(2)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -759,6 +844,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(3, el)}
+                        onKeyDown={handleKeyDown(3)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -784,6 +871,8 @@ const Usuario = () => {
                         <MenuItem value={3}>Visualizador</MenuItem>
                       </TextField>
                       <MaskedFieldOAB
+                        inputRef={(el) => registerInput(4, el)}
+                        onKeyDown={handleKeyDown(4)}
                         iconSize={18}
                         value={oab}
                         onChange={(e) => setOab(e.target.value)}
@@ -792,6 +881,8 @@ const Usuario = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(5, el)}
+                        onKeyDown={handleKeyDown(5)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -812,6 +903,8 @@ const Usuario = () => {
                         }}
                       />
                       <MaskedFieldCpf
+                        inputRef={(el) => registerInput(6, el)}
+                        onKeyDown={handleKeyDown(6)}
                         type="cpf"
                         label="CPF"
                         value={cpf}
@@ -823,6 +916,8 @@ const Usuario = () => {
                         autoComplete="off"
                       />
                       <MaskedFieldCep
+                        inputRef={(el) => registerInput(7, el)}
+                        onKeyDown={handleKeyDown(7)}
                         value={cep}
                         onChange={(e) => setCep(e.target.value)}
                         icon={<LocationCity />}
@@ -832,6 +927,8 @@ const Usuario = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(8, el)}
+                        onKeyDown={handleKeyDown(8)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -852,6 +949,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(9, el)}
+                        onKeyDown={handleKeyDown(9)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -878,6 +977,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(10, el)}
+                        onKeyDown={handleKeyDown(10)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -899,6 +1000,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(11, el)}
+                        onKeyDown={handleKeyDown(11)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -924,6 +1027,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(12, el)}
+                        onKeyDown={handleKeyDown(12)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -949,6 +1054,8 @@ const Usuario = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(13, el)}
+                        onKeyDown={handleKeyDown(13)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -970,6 +1077,8 @@ const Usuario = () => {
                       />
 
                       <MaskedFieldPhone
+                        inputRef={(el) => registerInput(14, el)}
+                        onKeyDown={handleKeyDown(14)}
                         value={telefone}
                         onChange={(e) => setTelefone(e.target.value)}
                         icon={<Phone />}

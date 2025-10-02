@@ -10,6 +10,8 @@ const MaskedFieldCep = ({
   iconSize = 24,
   labelSize = "small",
   width = "100%",
+  inputRef, // Adicione esta prop
+  onKeyDown, // Adicione esta prop
 }) => {
   const mask = [/\d/, /\d/, ".", /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/];
 
@@ -22,7 +24,13 @@ const MaskedFieldCep = ({
       render={(ref, props) => (
         <TextField
           {...props}
-          inputRef={ref}
+          inputRef={(element) => {
+            ref(element);
+            if (inputRef) {
+              inputRef(element);
+            }
+          }}
+          onKeyDown={onKeyDown}
           variant="outlined"
           size="small"
           fullWidth

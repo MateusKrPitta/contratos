@@ -91,7 +91,7 @@ const PeticaoDocumento = ({ onConteudoChange, cliente, advogado }) => {
     <tr>
       <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">ENDEREÇO:</td>
       <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
-        cliente?.endereco || "Rua Exemplo, 123"
+        cliente?.rua || "Rua Exemplo, 123"
       }</td>
       <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">Nº:</td>
       <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${

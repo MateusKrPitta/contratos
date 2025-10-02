@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../../../components/navbars/header";
 import HeaderPerfil from "../../../components/navbars/perfil";
 import ButtonComponent from "../../../components/button";
@@ -59,12 +59,37 @@ const Cliente = () => {
 
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
 
+  // Refs para os campos de input
+  const inputRefs = useRef([]);
+
+  // Função para focar no próximo campo
+  const focusNextInput = (currentIndex) => {
+    const nextIndex = currentIndex + 1;
+    if (inputRefs.current[nextIndex]) {
+      inputRefs.current[nextIndex].focus();
+    }
+  };
+
+  // Função para lidar com a tecla Enter
+  const handleKeyDown = (index) => (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      focusNextInput(index);
+    }
+  };
+
+  // Registrar input no array de refs
+  const registerInput = (index, element) => {
+    inputRefs.current[index] = element;
+  };
+
   const clientesFiltratos = clientesCadastrados.filter(
     (usuario) =>
       (usuario.nome || "").toLowerCase().includes(pesquisar.toLowerCase()) ||
       (usuario.email || "").toLowerCase().includes(pesquisar.toLowerCase()) ||
       (usuario.username || "").toLowerCase().includes(pesquisar.toLowerCase())
   );
+
   const FecharCadastro = () => {
     setCadastroUsuario(false);
     setClienteEditando(null);
@@ -84,6 +109,8 @@ const Cliente = () => {
     setCnh("");
     setProfissao("");
     setBairro("");
+    // Limpar refs
+    inputRefs.current = [];
   };
 
   const EditarOpcao = (usuario) => {
@@ -125,6 +152,8 @@ const Cliente = () => {
     setCnh("");
     setProfissao("");
     setBairro("");
+    // Limpar refs
+    inputRefs.current = [];
   };
 
   const handleCadastrarUsuario = async () => {
@@ -172,12 +201,12 @@ const Cliente = () => {
       setLoading(true);
       try {
         const response = await atualizarCliente(
-          clienteEditando.id, // ID como PRIMEIRO parâmetro
+          clienteEditando.id,
           nomeCompleto,
-          "", // senha (vazia se não for alterar)
+          "",
           email,
-          "", // permissao (vazia se não for usar)
-          "", // oab (vazia se não for usar)
+          "",
+          "",
           profissao,
           cpf,
           cep,
@@ -229,6 +258,7 @@ const Cliente = () => {
       setLoading(false);
     }
   };
+
   const validarCamposCadastro = () => {
     return (
       nomeCompleto.trim() !== "" &&
@@ -375,6 +405,8 @@ const Cliente = () => {
                 <div className="overflow-y-auto overflow-x-hidden max-h-[300px]">
                   <div className="mt-4 flex gap-3 flex-wrap">
                     <TextField
+                      inputRef={(el) => registerInput(0, el)}
+                      onKeyDown={handleKeyDown(0)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -395,6 +427,8 @@ const Cliente = () => {
                       }}
                     />
                     <TextField
+                      inputRef={(el) => registerInput(1, el)}
+                      onKeyDown={handleKeyDown(1)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -415,6 +449,8 @@ const Cliente = () => {
                       }}
                     />
                     <MaskedFieldPhone
+                      inputRef={(el) => registerInput(2, el)}
+                      onKeyDown={handleKeyDown(2)}
                       value={telefone}
                       onChange={(e) => setTelefone(e.target.value)}
                       icon={<Phone />}
@@ -424,20 +460,13 @@ const Cliente = () => {
                       autoComplete="off"
                     />
                     <TextField
-                      fullWidth
-                      variant="outlined"
+                      inputRef={(el) => registerInput(3, el)}
+                      onKeyDown={handleKeyDown(3)}
                       size="small"
                       label="RG"
                       name="RG"
                       value={rg}
-                      type="number"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,7}$/.test(value)) {
-                          setRg(value);
-                        }
-                      }}
-                      autoComplete="off"
+                      onChange={(e) => setRg(e.target.value)}
                       sx={{
                         width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
                       }}
@@ -450,6 +479,8 @@ const Cliente = () => {
                       }}
                     />
                     <MaskedFieldCpf
+                      inputRef={(el) => registerInput(4, el)}
+                      onKeyDown={handleKeyDown(4)}
                       type="cpf"
                       label="CPF"
                       value={cpf}
@@ -461,6 +492,8 @@ const Cliente = () => {
                       autoComplete="off"
                     />
                     <TextField
+                      inputRef={(el) => registerInput(5, el)}
+                      onKeyDown={handleKeyDown(5)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -482,6 +515,8 @@ const Cliente = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(6, el)}
+                      onKeyDown={handleKeyDown(6)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -503,6 +538,8 @@ const Cliente = () => {
                     />
 
                     <MaskedFieldCep
+                      inputRef={(el) => registerInput(7, el)}
+                      onKeyDown={handleKeyDown(7)}
                       value={cep}
                       onChange={(e) => setCep(e.target.value)}
                       icon={<LocationCity />}
@@ -512,6 +549,8 @@ const Cliente = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(8, el)}
+                      onKeyDown={handleKeyDown(8)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -533,6 +572,8 @@ const Cliente = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(9, el)}
+                      onKeyDown={handleKeyDown(9)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -555,6 +596,8 @@ const Cliente = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(10, el)}
+                      onKeyDown={handleKeyDown(10)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -576,6 +619,8 @@ const Cliente = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(11, el)}
+                      onKeyDown={handleKeyDown(11)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -598,6 +643,8 @@ const Cliente = () => {
                     />
 
                     <TextField
+                      inputRef={(el) => registerInput(12, el)}
+                      onKeyDown={handleKeyDown(12)}
                       fullWidth
                       variant="outlined"
                       size="small"
@@ -642,6 +689,8 @@ const Cliente = () => {
                   <div className="">
                     <div className="mt-4 flex gap-3 flex-wrap">
                       <TextField
+                        inputRef={(el) => registerInput(0, el)}
+                        onKeyDown={handleKeyDown(0)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -667,6 +716,8 @@ const Cliente = () => {
                         }}
                       />
                       <TextField
+                        inputRef={(el) => registerInput(1, el)}
+                        onKeyDown={handleKeyDown(1)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -687,6 +738,8 @@ const Cliente = () => {
                         }}
                       />
                       <MaskedFieldPhone
+                        inputRef={(el) => registerInput(2, el)}
+                        onKeyDown={handleKeyDown(2)}
                         value={telefone}
                         onChange={(e) => setTelefone(e.target.value)}
                         icon={<Phone />}
@@ -696,19 +749,13 @@ const Cliente = () => {
                         autoComplete="off"
                       />
                       <TextField
-                        fullWidth
-                        variant="outlined"
+                        inputRef={(el) => registerInput(3, el)}
+                        onKeyDown={handleKeyDown(3)}
                         size="small"
                         label="RG"
                         name="RG"
                         value={rg}
-                        type="number"
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d{0,7}$/.test(value)) {
-                            setRg(value);
-                          }
-                        }}
+                        onChange={(e) => setRg(e.target.value)}
                         autoComplete="off"
                         sx={{
                           width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
@@ -722,6 +769,8 @@ const Cliente = () => {
                         }}
                       />
                       <MaskedFieldCpf
+                        inputRef={(el) => registerInput(4, el)}
+                        onKeyDown={handleKeyDown(4)}
                         type="cpf"
                         label="CPF"
                         value={cpf}
@@ -733,6 +782,8 @@ const Cliente = () => {
                         autoComplete="off"
                       />
                       <TextField
+                        inputRef={(el) => registerInput(5, el)}
+                        onKeyDown={handleKeyDown(5)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -754,6 +805,8 @@ const Cliente = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(6, el)}
+                        onKeyDown={handleKeyDown(6)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -775,6 +828,8 @@ const Cliente = () => {
                       />
 
                       <MaskedFieldCep
+                        inputRef={(el) => registerInput(7, el)}
+                        onKeyDown={handleKeyDown(7)}
                         value={cep}
                         onChange={(e) => setCep(e.target.value)}
                         icon={<LocationCity />}
@@ -784,6 +839,8 @@ const Cliente = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(8, el)}
+                        onKeyDown={handleKeyDown(8)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -805,6 +862,8 @@ const Cliente = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(9, el)}
+                        onKeyDown={handleKeyDown(9)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -827,6 +886,8 @@ const Cliente = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(10, el)}
+                        onKeyDown={handleKeyDown(10)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -848,6 +909,8 @@ const Cliente = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(11, el)}
+                        onKeyDown={handleKeyDown(11)}
                         fullWidth
                         variant="outlined"
                         size="small"
@@ -870,6 +933,8 @@ const Cliente = () => {
                       />
 
                       <TextField
+                        inputRef={(el) => registerInput(12, el)}
+                        onKeyDown={handleKeyDown(12)}
                         fullWidth
                         variant="outlined"
                         size="small"

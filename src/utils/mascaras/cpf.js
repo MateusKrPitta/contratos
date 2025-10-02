@@ -13,6 +13,9 @@ const MaskedFieldCpf = ({
   iconSize = 24,
   labelSize = "medium",
   width = "100%",
+  inputRef, // Nova prop
+  onKeyDown, // Nova prop
+  autoComplete = "off",
 }) => {
   const mask =
     type === "cpf"
@@ -60,11 +63,18 @@ const MaskedFieldCpf = ({
       render={(ref, props) => (
         <TextField
           {...props}
-          inputRef={ref}
+          inputRef={(element) => {
+            ref(element);
+            if (inputRef) {
+              inputRef(element);
+            }
+          }}
+          onKeyDown={onKeyDown}
           variant="outlined"
           size="small"
           fullWidth
           label={label}
+          autoComplete={autoComplete}
           InputLabelProps={{
             shrink: true,
             style: { fontSize: labelSize === "small" ? "0.75rem" : "1rem" },

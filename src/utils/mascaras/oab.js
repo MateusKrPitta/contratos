@@ -10,6 +10,8 @@ const MaskedFieldOAB = ({
   iconSize = 24,
   labelSize = "small",
   width = "100%",
+  inputRef, // Adicione esta prop
+  onKeyDown, // Adicione esta prop
 }) => {
   const createMask = (rawValue) => {
     const digits = rawValue.replace(/\D/g, "");
@@ -48,7 +50,13 @@ const MaskedFieldOAB = ({
       render={(ref, props) => (
         <TextField
           {...props}
-          inputRef={ref}
+          inputRef={(element) => {
+            ref(element);
+            if (inputRef) {
+              inputRef(element);
+            }
+          }}
+          onKeyDown={onKeyDown}
           variant="outlined"
           size="small"
           fullWidth
