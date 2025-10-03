@@ -575,24 +575,18 @@ const Usuario = () => {
                       autoComplete="off"
                     />
                     <TextField
-                      inputRef={(el) => registerInput(7, el)}
-                      onKeyDown={handleKeyDown(7)}
+                      inputRef={(el) => registerInput(9, el)}
+                      onKeyDown={handleKeyDown(9)}
                       fullWidth
                       variant="outlined"
                       size="small"
                       label="RG"
                       name="RG"
                       value={rg}
-                      type="number"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (/^\d{0,7}$/.test(value)) {
-                          setRg(value);
-                        }
-                      }}
+                      onChange={(e) => setRg(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -957,13 +951,7 @@ const Usuario = () => {
                         label="RG"
                         name="RG"
                         value={rg}
-                        type="number"
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d{0,7}$/.test(value)) {
-                            setRg(value);
-                          }
-                        }}
+                        onChange={(e) => setRg(e.target.value)}
                         autoComplete="off"
                         sx={{
                           width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
