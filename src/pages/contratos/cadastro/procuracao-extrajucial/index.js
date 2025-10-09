@@ -171,6 +171,19 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
       }</td>
     </tr>
   </table>
+
+    <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; text-decoration: underline;">
+    <strong>PODERES:</strong> Amplos e ilimitados poderes para representar o Outorgante perante todo e qualquer órgão do <strong>SISTEMA NACIONAL DE TRÂNSITO</strong>, em defesas, recursos, contestação e pedido de reconsideração, em 1ª e 2ª instâncias, em autuações e/ou penalidades relativas à infrações de trânsito e/ou restrição a direitos, registradas nos órgãos acima mencionados, para tanto podendo: pedir e receber cópias de documentos, inclusive de Autos de Infrações Originais e Processos Administrativos; proceder verificações e contestar registro de autos infração de trânsito e penalidades, existentes contra veículos de propriedade ou conduzido pelo(a) Outorgante, protocolizar e providenciar registros para protocolos, verificar e conhecer de fatos e de registros de interesse sobre veículos e condução destes quando se relacione com os interesses do(a) Outorgante, consoante ao  <strong>TRÂNSITO LOCAL, ESTADUAL OU NACIONAL</strong>, podendo este mandato ser substabelecida com ou sem resenva de poderes.<strong> Por tais atos o Outorgante, desde já, os tem como firmes e valiosos na forma da Lei.</strong>
+  </div>
+  <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; ">
+    <strong>DOURADOS MS:</strong>
+  </div>
+  <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; ">
+    <strong>NOME:</strong>
+  </div>
+  <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; ">
+    <strong>CPF:</strong>
+  </div>
 </div>
 `;
   };

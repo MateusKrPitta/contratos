@@ -825,9 +825,8 @@ const Contratos = () => {
                 top={"5%"}
                 left={"10%"}
                 width={"90%"}
-                height={"85%"}
+                height={"100%"}
                 maxWidth="1000px"
-                maxHeight="600px"
                 icon={<AddCircleOutlineIcon fontSize="small" />}
                 open={cadastroContrato}
                 onClose={FecharCadastroContrato}
@@ -890,7 +889,7 @@ const Contratos = () => {
                 top={"5%"}
                 left={"10%"}
                 width={"90%"}
-                height={"85%"}
+                height={"100%"}
                 maxWidth="1000px"
                 maxHeight="600px"
                 icon={<AddCircleOutlineIcon fontSize="small" />}
