@@ -11,6 +11,7 @@ import {
   Search,
 } from "@mui/icons-material";
 import {
+  Autocomplete,
   Box,
   FormControl,
   InputAdornment,
@@ -452,20 +453,30 @@ const Contratos = () => {
       case 0:
         return (
           <div className="mt-4 flex gap-3 flex-wrap">
-            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-              <InputLabel>Cliente</InputLabel>
-              <Select
-                value={clienteSelecionado}
-                label="Cliente"
-                onChange={(e) => setClienteSelecionado(e.target.value)}
-              >
-                {clientesCadastrados.map((cliente) => (
-                  <MenuItem key={cliente.id} value={cliente.id}>
-                    {cliente.nome} - {cliente.cpf || cliente.email}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              fullWidth
+              size="small"
+              options={clientesCadastrados}
+              value={
+                clientesCadastrados.find((c) => c.id === clienteSelecionado) ||
+                null
+              }
+              onChange={(event, newValue) => {
+                setClienteSelecionado(newValue ? newValue.id : "");
+              }}
+              getOptionLabel={(option) =>
+                `${option.nome} - ${option.cpf || option.email || ""}`
+              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Cliente"
+                  placeholder="Digite o nome do cliente..."
+                />
+              )}
+              sx={{ mb: 2 }}
+            />
 
             <FormControl fullWidth size="small" sx={{ mb: 2 }}>
               <InputLabel>Advogado</InputLabel>
