@@ -420,6 +420,7 @@ const Contratos = () => {
         type: "success",
         message: "Contrato cadastrado com sucesso!",
       });
+      buscarContratosClientes();
     } catch (error) {
       console.error("Erro ao cadastrar contrato:", error);
       CustomToast({
