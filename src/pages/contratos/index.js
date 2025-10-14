@@ -63,13 +63,42 @@ const Contratos = () => {
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [contratosCadastrados, setContratosCadastrados] = useState([]);
+  const [contratosFiltrados, setContratosFiltrados] = useState([]);
   const [contratos, setContratos] = useState([]);
   const [contratoSelecionado, setContratoSelecionado] = useState(null);
+  const [filtroAdvogado, setFiltroAdvogado] = useState("");
 
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [itensPorPagina, setItensPorPagina] = useState(5);
   const [totalItens, setTotalItens] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
+
+  // Função para encontrar o ID do Manoel
+  const encontrarAdvogadoManoel = (usuariosList) => {
+    const manoel = usuariosList.find(
+      (usuario) => usuario.nome && usuario.nome.toUpperCase().includes("MANOEL")
+    );
+    return manoel ? manoel.id : "";
+  };
+
+  // Função para aplicar filtros
+  const aplicarFiltros = () => {
+    let contratosFiltrados = [...contratosCadastrados];
+
+    // Aplicar filtro por advogado
+    if (filtroAdvogado && filtroAdvogado !== "") {
+      contratosFiltrados = contratosFiltrados.filter(
+        (contrato) => contrato.advogadoId === parseInt(filtroAdvogado)
+      );
+    }
+
+    setContratosFiltrados(contratosFiltrados);
+    setTotalItens(contratosFiltrados.length);
+  };
+
+  useEffect(() => {
+    aplicarFiltros();
+  }, [contratosCadastrados, filtroAdvogado]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -130,6 +159,7 @@ const Contratos = () => {
         : [];
 
       setContratosCadastrados(contratosFormatados);
+      setContratosFiltrados(contratosFormatados);
 
       setTotalItens(contratosFormatados.length);
       setTotalPaginas(1);
@@ -146,6 +176,7 @@ const Contratos = () => {
       setPesquisando(false);
     }
   };
+
   const handleExcluirContrato = async (contrato) => {
     setLoading(true);
     try {
@@ -164,7 +195,8 @@ const Contratos = () => {
       setLoading(false);
     }
   };
-  const dadosParaTabela = contratosCadastrados;
+
+  const dadosParaTabela = pesquisar ? contratosCadastrados : contratosFiltrados;
 
   const handleMudarPagina = (novaPagina, novosItensPorPagina) => {
     if (novosItensPorPagina && novosItensPorPagina !== itensPorPagina) {
@@ -245,7 +277,11 @@ const Contratos = () => {
     setCadastroContrato(false);
     setEtapaAtiva(0);
     setClienteSelecionado("");
-    setAdvogadoSelecionado("");
+
+    // Sempre resetar para o Manoel ao fechar
+    const manoelId = encontrarAdvogadoManoel(usuarios);
+    setAdvogadoSelecionado(manoelId || "");
+
     setTituloContrato("");
     setPeticao("");
     setProcuracao("");
@@ -256,7 +292,11 @@ const Contratos = () => {
     setContratoSelecionado(null);
     setEtapaAtivaEdicao(0);
     setClienteSelecionado("");
-    setAdvogadoSelecionado("");
+
+    // Resetar para o Manoel ao fechar edição também
+    const manoelId = encontrarAdvogadoManoel(usuarios);
+    setAdvogadoSelecionado(manoelId || "");
+
     setTituloContrato("");
     setPeticaoHtml("");
     setContratoHtml("");
@@ -356,7 +396,16 @@ const Contratos = () => {
     try {
       setLoading(true);
       const response = await buscarUsuarios();
-      setUsuarios(response.data || []);
+      const usuariosData = response.data || [];
+      setUsuarios(usuariosData);
+
+      // Sempre definir Manoel como selecionado após carregar usuários
+      const manoelId = encontrarAdvogadoManoel(usuariosData);
+      if (manoelId) {
+        setAdvogadoSelecionado(manoelId);
+        // Também definir Manoel como filtro padrão
+        setFiltroAdvogado(manoelId);
+      }
     } catch (error) {
       console.error("Erro ao buscar usuários:", error);
     } finally {
@@ -485,12 +534,25 @@ const Contratos = () => {
                 label="Advogado"
                 onChange={(e) => setAdvogadoSelecionado(e.target.value)}
               >
-                {usuarios.map((usuario) => (
-                  <MenuItem key={usuario.id} value={usuario.id}>
-                    {usuario.nome} -{" "}
-                    {usuario.oab ? `OAB: ${usuario.oab}` : "Sem OAB"}
-                  </MenuItem>
-                ))}
+                {usuarios.map((usuario) => {
+                  const isManoel =
+                    usuario.nome &&
+                    usuario.nome.toUpperCase().includes("MANOEL");
+                  return (
+                    <MenuItem
+                      key={usuario.id}
+                      value={usuario.id}
+                      style={{
+                        fontWeight: isManoel ? "bold" : "normal",
+                        backgroundColor: isManoel ? "#f0f8ff" : "transparent",
+                      }}
+                    >
+                      {usuario.nome} -{" "}
+                      {usuario.oab ? `OAB: ${usuario.oab}` : "Sem OAB"}
+                      {isManoel && " ★ (Padrão)"}
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </FormControl>
 
@@ -622,12 +684,31 @@ const Contratos = () => {
                 onChange={(e) => setAdvogadoSelecionado(e.target.value)}
                 disabled={modoEdicao}
               >
-                {usuarios.map((usuario) => (
-                  <MenuItem key={usuario.id} value={usuario.id}>
-                    {usuario.nome} -{" "}
-                    {usuario.oab ? `OAB: ${usuario.oab}` : "Sem OAB"}
-                  </MenuItem>
-                ))}
+                {usuarios.map((usuario) => {
+                  const isManoel =
+                    usuario.nome &&
+                    usuario.nome.toUpperCase().includes("MANOEL");
+                  const isCurrent = usuario.id === advogadoSelecionado;
+                  return (
+                    <MenuItem
+                      key={usuario.id}
+                      value={usuario.id}
+                      style={{
+                        fontWeight: isManoel || isCurrent ? "bold" : "normal",
+                        backgroundColor: isManoel
+                          ? "#f0f8ff"
+                          : isCurrent
+                          ? "#e8f5e8"
+                          : "transparent",
+                      }}
+                    >
+                      {usuario.nome} -{" "}
+                      {usuario.oab ? `OAB: ${usuario.oab}` : "Sem OAB"}
+                      {isManoel && " ★"}
+                      {isCurrent && !isManoel && " (Atual)"}
+                    </MenuItem>
+                  );
+                })}
               </Select>
             </FormControl>
 
@@ -777,6 +858,41 @@ const Contratos = () => {
                   }}
                 />
 
+                {/* Select para filtrar por advogado */}
+                <FormControl
+                  size="small"
+                  sx={{
+                    width: { xs: "72%", sm: "30%", md: "25%", lg: "20%" },
+                    minWidth: "150px",
+                  }}
+                >
+                  <InputLabel>Filtrar por Advogado</InputLabel>
+                  <Select
+                    value={filtroAdvogado}
+                    label="Filtrar por Advogado"
+                    onChange={(e) => setFiltroAdvogado(e.target.value)}
+                  >
+                    <MenuItem value="">Todos os Advogados</MenuItem>
+                    {usuarios.map((usuario) => {
+                      const isManoel =
+                        usuario.nome &&
+                        usuario.nome.toUpperCase().includes("MANOEL");
+                      return (
+                        <MenuItem
+                          key={usuario.id}
+                          value={usuario.id}
+                          style={{
+                            fontWeight: isManoel ? "bold" : "normal",
+                          }}
+                        >
+                          {usuario.nome}
+                          {isManoel && " ★"}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+
                 <ButtonComponent
                   startIcon={<AddCircleOutlineIcon fontSize="small" />}
                   title={"Novo Contrato"}
@@ -824,7 +940,7 @@ const Contratos = () => {
                 <div className="text-center flex items-center w-full mt-28 justify-center gap-5 flex-col text-primary">
                   <TableLoading />
                   <label className="text-sm">
-                    {pesquisar
+                    {pesquisar || filtroAdvogado !== ""
                       ? "Nenhum contrato encontrado para sua pesquisa!"
                       : "Nenhum contrato cadastrado!"}
                   </label>
@@ -850,7 +966,7 @@ const Contratos = () => {
                         <StepLabel>Seleção</StepLabel>
                       </Step>
                       <Step>
-                        <StepLabel>Petição</StepLabel>
+                        <StepLabel>Peticao</StepLabel>
                       </Step>
                       <Step>
                         <StepLabel>Contrato</StepLabel>
@@ -915,7 +1031,7 @@ const Contratos = () => {
                         <StepLabel>Seleção</StepLabel>
                       </Step>
                       <Step>
-                        <StepLabel>Petição</StepLabel>
+                        <StepLabel>Peticao</StepLabel>
                       </Step>
                       <Step>
                         <StepLabel>Contrato</StepLabel>
