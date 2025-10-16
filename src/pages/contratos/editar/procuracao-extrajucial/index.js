@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import {
   Download,
+  Description, // Ícone para Word
   FormatBold,
   FormatItalic,
   FormatUnderlined,
@@ -249,7 +250,7 @@ const ProcuracaoExtrajudicialEditar = ({
 
     const options = {
       margin: [15, 15, 15, 15],
-      filename: "documento-defesa.pdf",
+      filename: "procuracao-extrajudicial.pdf",
       html2canvas: {
         scale: 2,
         useCORS: true,
@@ -275,6 +276,66 @@ const ProcuracaoExtrajudicialEditar = ({
     html2pdf().set(options).from(element).save();
   };
 
+const handleDownloadWord = () => {
+  const element = editorRef.current.cloneNode(true);
+  
+  // Prepara o conteúdo HTML mantendo todos os estilos
+  const conteudoHTML = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" 
+      xmlns:w="urn:schemas-microsoft-com:office:word" 
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="UTF-8">
+    <title>Procuração Extrajudicial</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+            <w:ValidateAgainstSchemas/>
+            <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+            <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+            <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+            <w:Compatibility>
+                <w:BreakWrappedTables/>
+                <w:SnapToGridInCell/>
+                <w:WrapTextWithPunct/>
+                <w:UseAsianBreakRules/>
+                <w:UseWord2010TableStyleRules/>
+            </w:Compatibility>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+</head>
+<body>
+    <div class="documento-content">
+        ${element.innerHTML}
+    </div>
+</body>
+</html>`;
+
+  // Resto do código permanece igual...
+  const blob = new Blob([conteudoHTML], { 
+      type: 'application/vnd.ms-word;charset=utf-8'
+  });
+  
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'procuracao-extrajudicial.doc';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  setSnackbar({
+    open: true,
+    message: "Documento Word baixado com sucesso!",
+    severity: "success"
+  });
+};
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -302,22 +363,6 @@ const ProcuracaoExtrajudicialEditar = ({
               <MenuItem value="Times New Roman">Times New Roman</MenuItem>
               <MenuItem value="Courier New">Courier New</MenuItem>
               <MenuItem value="Georgia">Georgia</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl size="small" sx={{ minWidth: 80, mr: 1 }}>
-            <InputLabel>Tamanho</InputLabel>
-            <Select
-              value={fontSize}
-              label="Tamanho"
-              onChange={(e) => changeFontSize(e.target.value)}
-            >
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={12}>12</MenuItem>
-              <MenuItem value={14}>14</MenuItem>
-              <MenuItem value={16}>16</MenuItem>
-              <MenuItem value={18}>18</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
             </Select>
           </FormControl>
 
@@ -367,7 +412,13 @@ const ProcuracaoExtrajudicialEditar = ({
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <IconButton onClick={handleDownloadPDF}>
+          {/* Botão para download em Word */}
+          <IconButton onClick={handleDownloadWord} title="Download Word">
+            <Description />
+          </IconButton>
+
+          {/* Botão para download em PDF */}
+          <IconButton onClick={handleDownloadPDF} title="Download PDF">
             <Download />
           </IconButton>
         </Toolbar>

@@ -14,6 +14,7 @@ import {
   Save,
   Print,
   Download,
+  Description, // Ícone para Word
   FormatBold,
   FormatItalic,
   FormatUnderlined,
@@ -94,7 +95,7 @@ const PeticaoDocumentoEditar = ({
 </div>`;
   };
 
-  const handleDownload = () => {
+  const handleDownloadPDF = () => {
     const element = editorRef.current.cloneNode(true);
 
     element.querySelectorAll("*").forEach((el) => {
@@ -132,6 +133,90 @@ const PeticaoDocumentoEditar = ({
     };
 
     html2pdf().set(options).from(element).save();
+  };
+
+  const handleDownloadWord = () => {
+    const element = editorRef.current.cloneNode(true);
+    
+    // Preserva todos os estilos inline do conteúdo
+    const conteudoComEstilos = element.innerHTML;
+    
+    // Prepara o conteúdo HTML mantendo todos os estilos
+    const conteudoHTML = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" 
+      xmlns:w="urn:schemas-microsoft-com:office:word" 
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta charset="UTF-8">
+    <title>Documento de Defesa</title>
+    <style>
+        /* Estilos globais para garantir compatibilidade com Word */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            -ms-text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+        div, p, table {
+            margin: 0;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        td {
+            border: 1px solid #000000;
+            padding: 5px;
+            font-size: 12px;
+        }
+        /* Mantém a formatação específica do template */
+        .documento-content {
+            margin-left: 40px;
+            margin-right: 40px;
+        }
+    </style>
+    <!--[if gte mso 9]>
+    <xml>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+</head>
+<body>
+    <div class="documento-content">
+        ${conteudoComEstilos}
+    </div>
+</body>
+</html>`;
+
+    // Cria um blob com o conteúdo - usando type específico para Word
+    const blob = new Blob([conteudoHTML], { 
+        type: 'application/vnd.ms-word;charset=utf-8'
+    });
+    
+    // Cria URL para download
+    const url = URL.createObjectURL(blob);
+    
+    // Cria link para download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'documento-defesa.doc';
+    
+    // Dispara o download
+    document.body.appendChild(link);
+    link.click();
+    
+    // Limpa
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleInput = () => {
@@ -251,7 +336,13 @@ const PeticaoDocumentoEditar = ({
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <IconButton onClick={handleDownload}>
+          {/* Botão para download em Word */}
+          <IconButton onClick={handleDownloadWord} title="Download Word">
+            <Description />
+          </IconButton>
+
+          {/* Botão para download em PDF (mantido) */}
+          <IconButton onClick={handleDownloadPDF} title="Download PDF">
             <Download />
           </IconButton>
         </Toolbar>
