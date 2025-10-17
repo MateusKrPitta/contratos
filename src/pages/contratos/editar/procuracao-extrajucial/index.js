@@ -249,7 +249,7 @@ const ProcuracaoExtrajudicialEditar = ({
     });
 
     const options = {
-      margin: [15, 15, 15, 15],
+      margin: [7, 15, 15, 15],
       filename: "procuracao-extrajudicial.pdf",
       html2canvas: {
         scale: 2,
