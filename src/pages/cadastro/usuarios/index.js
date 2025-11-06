@@ -35,10 +35,12 @@ import MaskedFieldOAB from "../../../utils/mascaras/oab";
 import { editarUsuario } from "../../../services/put/usuario";
 import { deletarUsuario } from "../../../services/delete/usuario";
 import MaskedFieldPhone from "../../../utils/mascaras/telefone";
+import { buscarEnderecoPorCep } from "../../../services/get/cep";
 
 const Usuario = () => {
   const [editando, setEditando] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingCep, setLoadingCep] = useState(false);
   const [cadastroUsuario, setCadastroUsuario] = useState(false);
   const [permissao, setPermissao] = useState("");
   const [username, setUsername] = useState("");
@@ -89,6 +91,49 @@ const Usuario = () => {
       (usuario.cpf &&
         usuario.cpf.toLowerCase().includes(pesquisar.toLowerCase()))
   );
+
+  const handleBuscarCep = async (cep) => {
+    if (cep.replace(/\D/g, "").length === 8) {
+      setLoadingCep(true);
+      try {
+        const endereco = await buscarEnderecoPorCep(cep);
+
+        // Preenche automaticamente os campos
+        setRua(endereco.logradouro);
+        setBairro(endereco.bairro);
+        setCidade(endereco.localidade);
+        setEstado(endereco.uf);
+
+        // Foca no campo número após preencher o endereço
+        setTimeout(() => {
+          if (inputRefs.current[13]) {
+            // Ajuste o índice conforme a posição do campo número
+            inputRefs.current[13].focus();
+          }
+        }, 100);
+      } catch (error) {
+        console.error("Erro ao buscar CEP:", error);
+        alert("CEP não encontrado. Por favor, verifique o CEP digitado.");
+
+        setRua("");
+        setBairro("");
+        setCidade("");
+        setEstado("");
+      } finally {
+        setLoadingCep(false);
+      }
+    }
+  };
+
+  // Função para lidar com a mudança do CEP
+  const handleCepChange = (novoCep) => {
+    setCep(novoCep);
+
+    // Busca automaticamente quando o CEP estiver completo
+    if (novoCep.replace(/\D/g, "").length === 8) {
+      handleBuscarCep(novoCep);
+    }
+  };
 
   const validarCamposCadastro = () => {
     return (
@@ -300,7 +345,7 @@ const Usuario = () => {
     }
   };
 
-  const handleDeletarUsuario = async (usuario) => {
+  const DeletarUsuario = async (usuario) => {
     setLoading(true);
     try {
       await deletarUsuario(usuario.id);
@@ -400,7 +445,7 @@ const Usuario = () => {
                     actionsLabel={"Ações"}
                     actionCalls={{
                       edit: (usuario) => EditarOpcao(usuario),
-                      delete: (usuario) => handleDeletarUsuario(usuario),
+                      delete: (usuario) => DeletarUsuario(usuario),
                     }}
                   />
                 ) : (
@@ -593,11 +638,12 @@ const Usuario = () => {
                       inputRef={(el) => registerInput(8, el)}
                       onKeyDown={handleKeyDown(8)}
                       value={cep}
-                      onChange={(e) => setCep(e.target.value)}
+                      onChange={(e) => handleCepChange(e.target.value)}
                       icon={<LocationCity />}
                       iconSize={24}
                       labelSize="small"
                       width="46%"
+                      disabled={loadingCep}
                     />
 
                     <TextField
@@ -906,11 +952,12 @@ const Usuario = () => {
                         inputRef={(el) => registerInput(7, el)}
                         onKeyDown={handleKeyDown(7)}
                         value={cep}
-                        onChange={(e) => setCep(e.target.value)}
+                        onChange={(e) => handleCepChange(e.target.value)}
                         icon={<LocationCity />}
                         iconSize={24}
                         labelSize="small"
                         width="49%"
+                        disabled={loadingCep}
                       />
 
                       <TextField

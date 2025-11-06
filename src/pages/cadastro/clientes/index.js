@@ -33,9 +33,11 @@ import { criarCliente } from "../../../services/post/cliente";
 import { buscarClientes } from "../../../services/get/cliente";
 import { atualizarCliente } from "../../../services/put/cliente";
 import { deletarCliente } from "../../../services/delete/cliente";
+import { buscarEnderecoPorCep } from "../../../services/get/cep";
 
 const Cliente = () => {
   const [editando, setEditando] = useState(false);
+  const [loadingCep, setLoadingCep] = useState(false);
   const [loading, setLoading] = useState(false);
   const [cadastroUsuario, setCadastroUsuario] = useState(false);
   const [permissao, setPermissao] = useState(null);
@@ -287,6 +289,57 @@ const Cliente = () => {
     visible: { opacity: 1 },
   };
 
+  const handleCepChange = (novoCep) => {
+    console.log("CEP digitado:", novoCep);
+    console.log("CEP limpo:", novoCep.replace(/\D/g, ""));
+    console.log("Tamanho:", novoCep.replace(/\D/g, "").length);
+
+    setCep(novoCep);
+
+    // Busca automaticamente quando o CEP estiver completo
+    if (novoCep.replace(/\D/g, "").length === 8) {
+      console.log("Chamando handleBuscarCep...");
+      handleBuscarCep(novoCep);
+    }
+  };
+
+  const handleBuscarCep = async (cep) => {
+    console.log("Iniciando busca do CEP:", cep);
+    if (cep.replace(/\D/g, "").length === 8) {
+      setLoadingCep(true);
+      try {
+        console.log("Fazendo requisição para ViaCEP...");
+        const endereco = await buscarEnderecoPorCep(cep);
+        console.log("Resposta da API:", endereco);
+
+        // Preenche automaticamente os campos
+        setRua(endereco.logradouro);
+        setBairro(endereco.bairro);
+        setCidade(endereco.localidade);
+        setEstado(endereco.uf);
+
+        console.log("Campos preenchidos automaticamente");
+
+        // Foca no campo número após preencher o endereço
+        setTimeout(() => {
+          if (inputRefs.current[11]) {
+            inputRefs.current[11].focus();
+          }
+        }, 100);
+      } catch (error) {
+        console.error("Erro ao buscar CEP:", error);
+        alert("CEP não encontrado. Por favor, verifique o CEP digitado.");
+
+        setRua("");
+        setBairro("");
+        setCidade("");
+        setEstado("");
+      } finally {
+        setLoadingCep(false);
+      }
+    }
+  };
+
   const buscarClienteCadastrados = async () => {
     try {
       setLoading(true);
@@ -535,13 +588,13 @@ const Cliente = () => {
                       inputRef={(el) => registerInput(7, el)}
                       onKeyDown={handleKeyDown(7)}
                       value={cep}
-                      onChange={(e) => setCep(e.target.value)}
+                      onChange={(e) => handleCepChange(e.target.value)}
                       icon={<LocationCity />}
                       iconSize={24}
                       labelSize="small"
                       width="47%"
+                      disabled={loadingCep} // Usa loadingCep aqui
                     />
-
                     <TextField
                       inputRef={(el) => registerInput(8, el)}
                       onKeyDown={handleKeyDown(8)}
@@ -825,11 +878,12 @@ const Cliente = () => {
                         inputRef={(el) => registerInput(7, el)}
                         onKeyDown={handleKeyDown(7)}
                         value={cep}
-                        onChange={(e) => setCep(e.target.value)}
+                        onChange={(e) => handleCepChange(e.target.value)}
                         icon={<LocationCity />}
                         iconSize={24}
                         labelSize="small"
                         width="49%"
+                        disabled={loadingCep}
                       />
 
                       <TextField
