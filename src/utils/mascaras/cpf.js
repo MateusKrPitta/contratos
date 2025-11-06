@@ -13,8 +13,8 @@ const MaskedFieldCpf = ({
   iconSize = 24,
   labelSize = "medium",
   width = "100%",
-  inputRef, // Nova prop
-  onKeyDown, // Nova prop
+  inputRef,
+  onKeyDown,
   autoComplete = "off",
 }) => {
   const mask =

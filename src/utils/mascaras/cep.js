@@ -10,8 +10,8 @@ const MaskedFieldCep = ({
   iconSize = 24,
   labelSize = "small",
   width = "100%",
-  inputRef, // Adicione esta prop
-  onKeyDown, // Adicione esta prop
+  inputRef,
+  onKeyDown,
 }) => {
   const mask = [/\d/, /\d/, ".", /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/];
 

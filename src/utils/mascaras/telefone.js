@@ -12,8 +12,8 @@ const MaskedFieldPhone = ({
   labelSize = "small",
   width = "100%",
   autoComplete = "off",
-  inputRef, // Nova prop
-  onKeyDown, // Nova prop
+  inputRef,
+  onKeyDown,
 }) => {
   const mask = [
     "(",

@@ -1,7 +1,7 @@
 import CustomToast from "../../components/toast";
 import httpsInstance from "../url";
 
-export const buscarContratos = async (page = 1, perPage = 5) => {
+export const buscarContratos = async (page = 1, perPage = 30) => {
   const https = httpsInstance();
   const token = sessionStorage.getItem("token");
 

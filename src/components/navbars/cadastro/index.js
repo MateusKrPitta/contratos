@@ -68,17 +68,6 @@ const HeaderCadastro = () => {
         isActive={activeSection === "cliente"}
         className={`w-[37%] sm:w-[50%] md:w-[40%] lg:w-[100%] `}
       />
-
-      {/* <ButtonComponent
-        id="elemento3"
-        startIcon={<Article fontSize="small" />}
-        title="Template"
-        subtitle={"Template"}
-        buttonSize="large"
-        onClick={() => handleNavigation("template")}
-        isActive={activeSection === "template"}
-        className={`w-[37%] sm:w-[50%] md:w-[40%] lg:w-[100%] `}
-      /> */}
     </div>
   );
 };

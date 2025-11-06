@@ -10,8 +10,8 @@ const MaskedFieldOAB = ({
   iconSize = 24,
   labelSize = "small",
   width = "100%",
-  inputRef, // Adicione esta prop
-  onKeyDown, // Adicione esta prop
+  inputRef,
+  onKeyDown,
 }) => {
   const createMask = (rawValue) => {
     const digits = rawValue.replace(/\D/g, "");

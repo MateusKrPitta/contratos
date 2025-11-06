@@ -111,7 +111,6 @@ const Dashboard = () => {
           transition={{ duration: 0.5 }}
           className="w-full"
         >
-          {/* Header */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 -mt-2">
             <label className="text-primary font-bold text-2xl flex gap-2 items-center">
               <DashboardIcon fontSize="medium" />
@@ -119,14 +118,12 @@ const Dashboard = () => {
             </label>
           </div>
 
-          {/* Métricas Principais */}
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
           >
-            {/* Total de Clientes */}
             <motion.div
               variants={fadeIn}
               className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow duration-300"
@@ -150,7 +147,6 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
-            {/* Total de Contratos */}
             <motion.div
               variants={fadeIn}
               className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500 hover:shadow-xl transition-shadow duration-300"
@@ -162,7 +158,6 @@ const Dashboard = () => {
                   </p>
                   <p className="text-3xl font-bold text-gray-800 mt-2">
                     {contratosMultiplicados}{" "}
-                    {/* Mostrando o valor multiplicado */}
                   </p>
                   <p className="text-green-500 text-xs mt-1 flex items-center">
                     <TrendingUpIcon fontSize="small" />
@@ -175,7 +170,6 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
-            {/* Média de Contratos por Cliente */}
             <motion.div
               variants={fadeIn}
               className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-shadow duration-300"
@@ -198,7 +192,6 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
-            {/* Estado Mais Comum */}
             <motion.div
               variants={fadeIn}
               className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500 hover:shadow-xl transition-shadow duration-300"
@@ -222,9 +215,7 @@ const Dashboard = () => {
             </motion.div>
           </motion.div>
 
-          {/* Grid Inferior */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Lista de Clientes Recentes */}
             <motion.div
               variants={fadeIn}
               className="bg-white rounded-xl shadow-lg p-6"
@@ -233,7 +224,7 @@ const Dashboard = () => {
                 <PeopleIcon className="mr-2 text-primary" />
                 Clientes Recentes
               </h3>
-              <div className="space-y-3 max-h-80 overflow-y-auto">
+              <div className="space-y-3 max-h-64 overflow-y-auto">
                 {clientesCadastrados.slice(0, 5).map((cliente, index) => (
                   <motion.div
                     key={cliente.id}
@@ -263,7 +254,6 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
-            {/* Distribuição por Estado */}
             <motion.div
               variants={fadeIn}
               className="bg-white rounded-xl shadow-lg p-6"

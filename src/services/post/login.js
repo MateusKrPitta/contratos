@@ -10,7 +10,6 @@ export const login = async (email, senha) => {
     });
     return response.data;
   } catch (error) {
-    // Extrai a mensagem do response data
     const errorMessage = error.response?.data?.error || "Erro ao fazer login";
 
     CustomToast({ type: "error", message: errorMessage });

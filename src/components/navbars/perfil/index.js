@@ -85,11 +85,9 @@ const HeaderPerfil = () => {
   useEffect(() => {
     const getUserName = () => {
       try {
-        // Busca diretamente pela chave "user"
         const userData = sessionStorage.getItem("user");
         if (userData) {
           const parsedUser = JSON.parse(userData);
-          // Acessa a propriedade nome diretamente
           setUserName(parsedUser.nome || "Usuário");
         } else {
           setUserName("Usuário");
@@ -107,7 +105,7 @@ const HeaderPerfil = () => {
     <>
       <div className="hidden md:flex justify-end w-full h-8">
         <div
-          className="transition-allbg-center lg:flex items-center justify-center w-full pt-4 md:pt-0 lg:w-[18%] h-16 bg-cover bg-no-repeat rounded-bl-lg pr-4"
+          className="transition-allbg-center lg:flex items-center justify-center w-full pt-4 md:pt-0 lg:w-[25%] h-16 bg-cover bg-no-repeat rounded-bl-lg pr-4"
           style={{
             borderRight: "1px solid #E2E8F0",
             background: "linear-gradient(180deg, #2C5282 0%, #3182CE 100%)",

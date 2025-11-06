@@ -2,7 +2,7 @@ import httpsInstance from "../url";
 import CustomToast from "../../components/toast";
 
 export const atualizarCliente = async (
-  id, // PRIMEIRO parâmetro
+  id,
   nome,
   senha,
   email,

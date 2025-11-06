@@ -22,11 +22,9 @@ const Navbar = ({ user }) => {
   const tipoUsuario = localStorage.getItem("tipo");
   const isUsuarioTipo3 = tipoUsuario === "3";
 
-  // Recuperar os dados do usuário do localStorage
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    // Tentar obter do prop primeiro, depois do localStorage
     if (user) {
       setUserData(user);
     } else {

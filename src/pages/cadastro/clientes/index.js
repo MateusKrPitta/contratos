@@ -59,10 +59,8 @@ const Cliente = () => {
 
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
 
-  // Refs para os campos de input
   const inputRefs = useRef([]);
 
-  // Função para focar no próximo campo
   const focusNextInput = (currentIndex) => {
     const nextIndex = currentIndex + 1;
     if (inputRefs.current[nextIndex]) {
@@ -70,15 +68,12 @@ const Cliente = () => {
     }
   };
 
-  // Função para lidar com a tecla Enter
   const handleKeyDown = (index) => (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
       focusNextInput(index);
     }
   };
-
-  // Registrar input no array de refs
   const registerInput = (index, element) => {
     inputRefs.current[index] = element;
   };
@@ -109,7 +104,6 @@ const Cliente = () => {
     setCnh("");
     setProfissao("");
     setBairro("");
-    // Limpar refs
     inputRefs.current = [];
   };
 
