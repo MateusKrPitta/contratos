@@ -175,15 +175,40 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
     <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; text-decoration: underline;">
     <strong>PODERES:</strong> Amplos e ilimitados poderes para representar o Outorgante perante todo e qualquer órgão do <strong style="text-decoration: underline">SISTEMA NACIONAL DE TRÂNSITO</strong>, em defesas, recursos, contestação e pedido de reconsideração, em 1ª e 2ª instâncias, em autuações e/ou penalidades relativas à infrações de trânsito e/ou restrição a direitos, registradas nos órgãos acima mencionados, para tanto podendo: pedir e receber cópias de documentos, inclusive de Autos de Infrações Originais e Processos Administrativos; proceder verificações e contestar registro de autos infração de trânsito e penalidades, existentes contra veículos de propriedade ou conduzido pelo(a) Outorgante, protocolizar e providenciar registros para protocolos, verificar e conhecer de fatos e de registros de interesse sobre veículos e condução destes quando se relacione com os interesses do(a) Outorgante, consoante ao  <strong style="text-decoration: underline">TRÂNSITO LOCAL, ESTADUAL OU NACIONAL</strong>, podendo este mandato ser substabelecida com ou sem resenva de poderes.<strong style="text-decoration: underline"> Por tais atos o Outorgante, desde já, os tem como firmes e valiosos na forma da Lei.</strong>
   </div>
-  <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; ">
-    <strong>DOURADOS MS:</strong>
+ <div style="font-size: 14px; font-family: 'Arial'; text-align: justify; margin-bottom: 20px;">
+    <strong> DOURADOS MS, ${new Date().toLocaleDateString("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })}.</strong>
   </div>
-  <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; ">
-    <strong>NOME:</strong>
+
+  <!-- Área da assinatura -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; position: relative;">
+    <!-- Nome e CPF à esquerda -->
+    <div style="flex: 1;">
+      <div style="font-size: 14px; font-family: 'Arial'; margin-bottom: 40px; position: relative;">
+      <div style="border-bottom: 1px solid #000; width: 100%; margin-top: 5px; "></div> 
+      <strong>NOME: ${cliente?.nome || "NÃO INFORMADO"}</strong>
+        <!-- Linha para assinatura manual -->
+        
+      </div>
+      <div style="font-size: 14px; font-family: 'Arial'; position: relative;">
+        <strong>CPF: ${cliente?.cpf || "NÃO INFORMADO"}</strong>
+        <!-- Linha para assinatura manual -->
+      </div>
+    </div>
+    
+    <!-- Quadrado da assinatura digital à direita -->
+    <div style="border: 1px solid #000;  text-align: center; width: 300px; min-height: 120px; display: flex; flex-direction: column; justify-content: start; margin-top:-30px">
+      <div style="font-size: 10px; font-family: 'Arial'; font-weight: bold; margin-top:5px ">
+        Assinatura digital - se assim for
+      </div>
+      
+    </div>
   </div>
-  <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; ">
-    <strong>CPF:</strong>
-  </div>
+
+  
 </div>
 `;
   };

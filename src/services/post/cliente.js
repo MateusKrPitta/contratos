@@ -44,6 +44,11 @@ export const criarCliente = async (
         Authorization: `Bearer ${token}`,
       },
     });
+
+    if (response.data.success) {
+      CustomToast({ type: "success", message: response.data.message });
+    }
+
     return response.data;
   } catch (error) {
     const errorDetails =

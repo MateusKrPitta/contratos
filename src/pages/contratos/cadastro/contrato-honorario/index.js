@@ -58,7 +58,25 @@ CONTRATO DE HONORÁRIOS DE SERVIÇOS ADVOCATÍCIOS
   
  
   <div style="font-family: 'Arial'; font-size: 16px;  text-align: justify; margin-bottom: 16px; text-indent: 100px;">
-    Pelo presente instrumento particular de prestação de serviços advocatícios, de um lado como <strong style="text-transform:uppercase">CONTRATANTE:  ${cliente?.nome}</strong>, brasileiro, ensino superior incompleto, ${cliente?.profissao}, portador do documento de identidade RG ${cliente?.rg} e CPF ${cliente?.cpf}, com endereço à Rua ${cliente?.rua} nº ${cliente?.numero}, Bairro ${cliente?.bairro}, CEP ${cliente?.cep}, ${cliente?.cidade}/${cliente?.estado}, telefone ${cliente?.telefone}, e de outro lado como <strong style="text-transform:uppercase">CONTRATADO: ${advogado?.nome}</strong>, inscrito na OAB ${advogado?.oab}, com escritório profissional localizado na Rua  ${advogado?.rua}, nº  ${advogado?.numero},  ${advogado?.bairro}, 2º Andar, Sala 22, CEP  ${advogado?.cep},  ${advogado?.cidade}/${advogado?.estado}, tem entre si justo e contratado o seguinte:
+    Pelo presente instrumento particular de prestação de serviços advocatícios, de um lado como <strong style="text-transform:uppercase">CONTRATANTE:  ${
+      cliente?.nome
+    }</strong>, brasileiro, ensino superior incompleto, ${
+    cliente?.profissao
+  }, portador do documento de identidade RG ${cliente?.rg} e CPF ${
+    cliente?.cpf
+  }, com endereço à Rua ${cliente?.rua} nº ${cliente?.numero}, Bairro ${
+    cliente?.bairro
+  }, CEP ${cliente?.cep}, ${cliente?.cidade}/${cliente?.estado}, telefone ${
+    cliente?.telefone
+  }, e de outro lado como <strong style="text-transform:uppercase">CONTRATADO: ${
+    advogado?.nome
+  }</strong>, inscrito na OAB ${
+    advogado?.oab
+  }, com escritório profissional localizado na Rua  ${advogado?.rua}, nº  ${
+    advogado?.numero
+  },  ${advogado?.bairro}, 2º Andar, Sala 22, CEP  ${advogado?.cep},  ${
+    advogado?.cidade
+  }/${advogado?.estado}, tem entre si justo e contratado o seguinte:
   </div>
   
   <div style="font-family: 'Arial'; font-size: 16px; text-align: justify; margin-bottom: 16px; text-indent: 100px;">
@@ -105,17 +123,25 @@ CONTRATO DE HONORÁRIOS DE SERVIÇOS ADVOCATÍCIOS
   As partes elegem o foro da comarca de Dourados/MS para dirimir as eventuais dúvidas oriundas do presente contrato.
     </div>
               <div style="font-family: 'Arial'; font-size: 16px; text-align: justify; margin-bottom: 16px; text-indent: 100px;">
-    Dourados-MS, 01 de Setembro de 2025.
+     Dourados-MS, ${new Date().toLocaleDateString("pt-BR", {
+       day: "numeric",
+       month: "long",
+       year: "numeric",
+     })}.
     </div>
 
    <div style="font-family: 'Arial'; display:flex; margin-top: 100px; align-items:center;  margin-bottom: 16px; width:100%; justify-content: center;">
         <div style="font-family: 'Arial'; font-size: 14px; display:flex; flex-direction: column; gap:10px; width:45%; justify-content: center; align-items:center;">
         <p style:"text-align: center; display:flex; width:100%">________________________________</p>
-         <p style:"text-align: center; display:flex; width:100%">${cliente?.nome} </p>
+         <p style:"text-align: center; display:flex; width:100%">${
+           cliente?.nome
+         } </p>
   </div >
     <div style="font-family: 'Arial'; font-size: 14px; display:flex;   flex-direction: column; gap:10px; width:45%; justify-content: center; align-items:center;">
          <label style:"text-align: center; display:flex;   align-items: center; justify-conter:center; width:100%">_______________________________</label>
-          <label style:"text-align: center; display:flex;   align-items: center; justify-conter:center; width:100%">  ${advogado?.nome} </label>
+          <label style:"text-align: center; display:flex;   align-items: center; justify-conter:center; width:100%">  ${
+            advogado?.nome
+          } </label>
     </div>
     </div>
 

@@ -403,6 +403,7 @@ const Usuario = () => {
                 ) : usuariosFiltrados.length > 0 ? (
                   <TableComponent
                     headers={usuarioCadastrados}
+                    showPagination={false}
                     rows={cadastrosUsuarios(usuariosFiltrados)}
                     actionsLabel={"Ações"}
                     actionCalls={{
@@ -586,7 +587,7 @@ const Usuario = () => {
                       onChange={(e) => setRg(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (

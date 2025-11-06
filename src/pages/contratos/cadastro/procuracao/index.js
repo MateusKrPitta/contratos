@@ -379,10 +379,14 @@ const PeticaoDocumento = ({ onConteudoChange, cliente, advogado }) => {
     Pede e Espera Deferimento
   </div>
   
-  <div style="font-family: 'Arial'; font-size: 16px; text-align: center; margin-bottom: 16px;">
-    Dourados- MS, 18 de agosto de 2025.
-  </div>
     <div style="font-family: 'Arial'; font-size: 16px; text-align: center; margin-bottom: 16px;">
+    Dourados- MS, ${new Date().toLocaleDateString("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })}.
+  </div>
+    <div style="font-family: 'Arial'; font-size: 16px; text-align: center; margin-bottom: 16px; margin-top:50px">
     ______________________________________
   </div>
 

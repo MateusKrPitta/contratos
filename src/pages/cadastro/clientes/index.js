@@ -152,7 +152,6 @@ const Cliente = () => {
     setCnh("");
     setProfissao("");
     setBairro("");
-    // Limpar refs
     inputRefs.current = [];
   };
 
@@ -371,6 +370,7 @@ const Cliente = () => {
                   </div>
                 ) : clientesFiltratos.length > 0 ? (
                   <TableComponent
+                    showPagination={false}
                     headers={clientesCadastradosNovos}
                     rows={cadastrosCliente(clientesFiltratos)}
                     actionsLabel={"Ações"}
@@ -456,7 +456,7 @@ const Cliente = () => {
                       icon={<Phone />}
                       iconSize={24}
                       labelSize="small"
-                      width="49%"
+                      width="50%"
                       autoComplete="off"
                     />
                     <TextField
@@ -488,7 +488,7 @@ const Cliente = () => {
                       icon={<ArticleOutlined />}
                       iconSize={24}
                       labelSize="small"
-                      width="47%"
+                      width="50%"
                       autoComplete="off"
                     />
                     <TextField
@@ -526,7 +526,7 @@ const Cliente = () => {
                       onChange={(e) => setCnh(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -545,7 +545,7 @@ const Cliente = () => {
                       icon={<LocationCity />}
                       iconSize={24}
                       labelSize="small"
-                      width="49%"
+                      width="47%"
                     />
 
                     <TextField
@@ -560,7 +560,7 @@ const Cliente = () => {
                       onChange={(e) => setCidade(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -584,7 +584,7 @@ const Cliente = () => {
                       onChange={(e) => setEstado(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -607,7 +607,7 @@ const Cliente = () => {
                       onChange={(e) => setRua(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (
@@ -778,7 +778,7 @@ const Cliente = () => {
                         icon={<ArticleOutlined />}
                         iconSize={24}
                         labelSize="small"
-                        width="47%"
+                        width="49%"
                         autoComplete="off"
                       />
                       <TextField

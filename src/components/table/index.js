@@ -32,6 +32,7 @@ const TableComponent = ({
   selectable = false,
   onSelectionChange,
   paginacao = null,
+  showPagination = true,
 }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
@@ -412,19 +413,21 @@ const TableComponent = ({
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 20, 50]}
-        component="div"
-        count={totalItens}
-        rowsPerPage={itensPorPagina}
-        page={paginaAtual}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        labelRowsPerPage="Itens por página:"
-        labelDisplayedRows={({ from, to, count }) =>
-          `${from}-${to} de ${count}`
-        }
-      />
+      {showPagination && (
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 20, 50]}
+          component="div"
+          count={totalItens}
+          rowsPerPage={itensPorPagina}
+          page={paginaAtual}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Itens por página:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}-${to} de ${count}`
+          }
+        />
+      )}
     </Box>
   );
 };
