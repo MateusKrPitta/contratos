@@ -28,7 +28,7 @@ import html2pdf from "html2pdf.js";
 
 const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
   const editorRef = useRef(null);
-  const [fontFamily, setFontFamily] = useState("Arial");
+  const [fontFamily, setFontFamily] = useState("Times");
   const [fontSize, setFontSize] = useState(14);
   const [alignment, setAlignment] = useState("left");
   const [isBold, setIsBold] = useState(false);
@@ -49,133 +49,133 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
 
   const getInitialContent = () => {
     return `
-<div style="line-height: 1.5; margin-left: 40px; margin-right:40px">
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
+<div style="line-height: 1.5; margin-left: 20px; margin-right:20px">
+  <div style="font-size: 16px; font-family: 'Times'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
     PROCURAÇÃO EXTRAJUDICIAL
   </div>
   
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; text-decoration: underline;">
+  <div style="font-size: 14px; font-family: 'Times'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase; text-decoration: underline;">
     ESPECÍFICA PARA TRAMITAÇÃO E CONSULTAS A DOCUMENTOS NOS ÓRGÃOS DO SISTEMA NACIONAL DE TRÂNSITO.
   </div>
   
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: start; font-weight: bold; margin-bottom: 20px;">
+  <div style="font-size: 13px; font-family: 'Times'; text-align: start; font-weight: bold; margin-bottom: 20px;">
     OUTORGANTE: 
   </div>
   
   <table style="width: 100%; font-family: 'Times New Roman, sans-serif !important'; border-collapse: collapse; margin-bottom: 20px; border: 1px solid black;">
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">NOME:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">NOME:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.nome || "NÃO INFORMADO"
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CPF</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">CPF</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.cpf || "NÃO INFORMADO"
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CNH Nº:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">CNH Nº:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.cnh || "NÃO INFORMADO"
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">RG/UF:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">RG/UF:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.rg || "NÃO INFORMADO"
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">ENDEREÇO:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">ENDEREÇO:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.rua
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">Nº:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">Nº:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.numero
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">BAIRRO:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">BAIRRO:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.bairro
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CEP:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">CEP:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.cep
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CIDADE/UF:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">CIDADE/UF:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.cidade
       }/${cliente?.estado}</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CELULAR:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px; font-weight: bold;">CELULAR:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 6px;">${
         cliente?.telefone || cliente?.celular || "NÃO INFORMADO"
       }</td>
     </tr>
   </table>
   
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: start; font-weight: bold; margin-bottom: 20px;">
+  <div style="font-size: 13px; font-family: 'Times'; text-align: start; font-weight: bold; margin-bottom: 20px;">
     OUTORGADOS:  
   </div>
   
   <table style="width: 100%; font-family: 'Times New Roman, sans-serif !important'; border-collapse: collapse; margin-bottom: 20px; border: 1px solid black;">
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">NOME:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">NOME:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.nome || "NÃO INFORMADO"
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CPF</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CPF</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.cpf || "NÃO INFORMADO"
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">OAB Nº:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">OAB Nº:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.oab || "NÃO INFORMADO"
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">RG/UF:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">RG/UF:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.rg
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">ENDEREÇO:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">ENDEREÇO:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.rua
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">Nº:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">Nº:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.numero
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">BAIRRO:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">BAIRRO:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.bairro
       }</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CEP:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CEP:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.cep
       }</td>
     </tr>
     <tr>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CIDADE/UF:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CIDADE/UF:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.cidade
       }/${advogado?.estado}</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px; font-weight: bold;">CELULAR:</td>
-      <td style="border: 1px solid black; font-size: 12px; padding: 8px;">${
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CELULAR:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
         advogado?.telefone || advogado?.celular || "NÃO INFORMADO"
       }</td>
     </tr>
   </table>
 
-    <div style="font-size: 14px; font-family: 'Arial'; text-align: justify;  margin-bottom: 20px; text-decoration: underline;">
+    <div style="font-size: 14px; font-family: 'Times'; text-align: justify;  margin-bottom: 20px; text-decoration: underline;">
     <strong>PODERES:</strong> Amplos e ilimitados poderes para representar o Outorgante perante todo e qualquer órgão do <strong style="text-decoration: underline">SISTEMA NACIONAL DE TRÂNSITO</strong>, em defesas, recursos, contestação e pedido de reconsideração, em 1ª e 2ª instâncias, em autuações e/ou penalidades relativas à infrações de trânsito e/ou restrição a direitos, registradas nos órgãos acima mencionados, para tanto podendo: pedir e receber cópias de documentos, inclusive de Autos de Infrações Originais e Processos Administrativos; proceder verificações e contestar registro de autos infração de trânsito e penalidades, existentes contra veículos de propriedade ou conduzido pelo(a) Outorgante, protocolizar e providenciar registros para protocolos, verificar e conhecer de fatos e de registros de interesse sobre veículos e condução destes quando se relacione com os interesses do(a) Outorgante, consoante ao  <strong style="text-decoration: underline">TRÂNSITO LOCAL, ESTADUAL OU NACIONAL</strong>, podendo este mandato ser substabelecida com ou sem resenva de poderes.<strong style="text-decoration: underline"> Por tais atos o Outorgante, desde já, os tem como firmes e valiosos na forma da Lei.</strong>
   </div>
- <div style="font-size: 14px; font-family: 'Arial'; text-align: justify; margin-bottom: 20px;">
+ <div style="font-size: 14px; font-family: 'Times'; text-align: justify; margin-bottom: 20px;">
     <strong> DOURADOS MS, ${new Date().toLocaleDateString("pt-BR", {
       day: "numeric",
       month: "long",
@@ -187,21 +187,21 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
   <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; position: relative;">
     <!-- Nome e CPF à esquerda -->
     <div style="flex: 1;">
-      <div style="font-size: 14px; font-family: 'Arial'; margin-bottom: 40px; position: relative;">
+      <div style="font-size: 14px; font-family: 'Times'; margin-bottom: 40px; position: relative;">
       <div style="border-bottom: 1px solid #000; width: 100%; margin-top: 5px; "></div> 
       <strong>NOME: ${cliente?.nome || "NÃO INFORMADO"}</strong>
         <!-- Linha para assinatura manual -->
         
       </div>
-      <div style="font-size: 14px; font-family: 'Arial'; position: relative;">
+      <div style="font-size: 14px; font-family: 'Times'; position: relative;">
         <strong>CPF: ${cliente?.cpf || "NÃO INFORMADO"}</strong>
         <!-- Linha para assinatura manual -->
       </div>
     </div>
     
     <!-- Quadrado da assinatura digital à direita -->
-    <div style="border: 1px solid #000;  text-align: center; width: 300px; min-height: 120px; display: flex; flex-direction: column; justify-content: start; margin-top:-30px">
-      <div style="font-size: 10px; font-family: 'Arial'; font-weight: bold; margin-top:5px ">
+    <div style="border: 1px solid #000;  text-align: center; width: 200px; min-height: 120px; display: flex; flex-direction: column; justify-content: start; margin-top:-30px">
+      <div style="font-size: 10px; font-family: 'Times'; font-weight: bold; margin-top:5px ">
         Assinatura digital - se assim for
       </div>
       
@@ -321,7 +321,7 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
               label="Fonte"
               onChange={(e) => changeFontFamily(e.target.value)}
             >
-              <MenuItem value="Arial">Arial</MenuItem>
+              <MenuItem value="Times">Times</MenuItem>
               <MenuItem value="Times New Roman">Times New Roman</MenuItem>
               <MenuItem value="Courier New">Courier New</MenuItem>
               <MenuItem value="Georgia">Georgia</MenuItem>
