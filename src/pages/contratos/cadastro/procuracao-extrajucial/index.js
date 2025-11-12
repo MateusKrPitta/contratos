@@ -187,8 +187,8 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
   <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; position: relative;">
     <!-- Nome e CPF à esquerda -->
     <div style="flex: 1;">
-      <div style="font-size: 14px; font-family: 'Times'; margin-bottom: 40px; position: relative;">
-      <div style="border-bottom: 1px solid #000; width: 100%; margin-top: 5px; "></div> 
+      <div style="font-size: 14px; font-family: 'Times'; margin-bottom: 40px; position: relative; margin-top:45px">
+      <div style="border-bottom: 1px solid #000; width: 35%; margin-top: 5px; "></div> 
       <strong>NOME: ${cliente?.nome || "NÃO INFORMADO"}</strong>
         <!-- Linha para assinatura manual -->
         

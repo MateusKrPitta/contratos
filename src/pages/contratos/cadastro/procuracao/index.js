@@ -47,11 +47,11 @@ const PeticaoDocumento = ({ onConteudoChange, cliente, advogado }) => {
 
   const initialContent = `
 <div style="  line-height: 1.5; margin-left: 40px; margin-right:40px;">
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
+  <div style="font-size: 16px; font-family: 'Arial'; text-align: start; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
     ILUSTRÍSSIMO SENHOR DIRETOR PRESIDENTE DO DETRAN/MS
   </div>
   
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
+  <div style="font-size: 16px; font-family: 'Arial'; text-align: start; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
     CAMPO GRANDE MS.
   </div>
   
