@@ -8,6 +8,7 @@ const HeaderCadastro = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeSection, setActiveSection] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [permissions, setPermissions] = useState([]);
 
   useEffect(() => {
