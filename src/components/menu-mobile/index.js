@@ -1,24 +1,18 @@
 import React, { useState } from "react";
 import logoPaxVerde from "../../assets/png/contrato.png";
 import { useNavigate } from "react-router-dom";
-import MiscellaneousServicesIcon from "@mui/icons-material/MiscellaneousServices";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import MenuIcon from "@mui/icons-material/Menu";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
 import {
   Article,
   ExitToApp,
   ProductionQuantityLimits,
 } from "@mui/icons-material";
-import AutoAwesomeMotionIcon from "@mui/icons-material/AutoAwesomeMotion";
 import { IconButton } from "@mui/material";
-import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
-import BarChartIcon from "@mui/icons-material/BarChart";
 
 const MenuMobile = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const tipoUsuario = sessionStorage.getItem("tipo");
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);

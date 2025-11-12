@@ -36,14 +36,12 @@ import ProcuracaoExtrajudicial from "./cadastro/procuracao-extrajucial";
 import PeticaoDocumento from "./cadastro/procuracao";
 import CustomToast from "../../components/toast";
 import { criarContrato } from "../../services/post/contratos";
-import { buscarContratos } from "../../services/get/contrato";
 import PeticaoDocumentoEditar from "./editar/procuracao";
 import ContratoHonorarioEditar from "./editar/contrato-honorario";
 import ProcuracaoExtrajudicialEditar from "./editar/procuracao-extrajucial";
 import { atualizarContrato } from "../../services/put/contrato";
 import { pesquisaContratos } from "../../services/get/pesquisa-contratos";
 import { deletarContrato } from "../../services/delete/contrato";
-import { buscarContratosClientes } from "../../services/get/advogado-contratos";
 import { buscarContratosAdvogado } from "../../services/get/busca-contratos-id-advogado";
 
 const Contratos = () => {
@@ -65,8 +63,6 @@ const Contratos = () => {
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [contratosCadastrados, setContratosCadastrados] = useState([]);
-  const [contratosFiltrados, setContratosFiltrados] = useState([]);
-  const [contratos, setContratos] = useState([]);
 
   const [contratoSelecionado, setContratoSelecionado] = useState(null);
   const [filtroAdvogado, setFiltroAdvogado] = useState("");
@@ -85,7 +81,6 @@ const Contratos = () => {
   const obterDadosPaginados = () => {
     return contratosCadastrados;
   };
-
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -116,14 +111,14 @@ const Contratos = () => {
     buscarContratosAdvogadoLogado(paginaAtual, itensPorPagina);
   }, [paginaAtual, itensPorPagina]);
 
-
   const handlePesquisaContratos = async (termo) => {
     try {
       setPesquisando(true);
       setLoading(true);
 
       const response = await pesquisaContratos(termo);
-      const dados = response?.data?.data ||
+      const dados =
+        response?.data?.data ||
         response?.data?.data?.data ||
         response?.data ||
         response ||
@@ -137,38 +132,39 @@ const Contratos = () => {
 
       const contratosFormatados = Array.isArray(dados)
         ? dados.map((contrato) => {
-          const cliente = clientes.find((c) => c.id === contrato.clienteId);
-          const advogado = usuariosList.find((u) => u.id === contrato.userId);
+            const cliente = clientes.find((c) => c.id === contrato.clienteId);
+            const advogado = usuariosList.find((u) => u.id === contrato.userId);
 
-          return {
-            id: contrato.id,
-            clienteId: contrato.clienteId,
-            clienteNome: cliente?.nome || "Cliente não encontrado",
-            clienteInfo: cliente || {},
-            advogadoId: contrato.userId,
-            advogadoNome: advogado?.nome || "Advogado não encontrado",
-            advogadoInfo: advogado || {},
-            titulo: contrato.titulo,
-            peticaoHtml: contrato.peticaoHtml,
-            procuracaoHtml: contrato.procuracaoHtml,
-            honorarioHtml: contrato.honorarioHtml,
-            dataCriacao: contrato.createdAt,
-            status: contrato.status === "concluido" ? "Ativo" : "Inativo",
-            numeroContrato: contrato.numeroContrato,
-            hash: contrato.hash,
-          };
-        })
+            return {
+              id: contrato.id,
+              clienteId: contrato.clienteId,
+              clienteNome: cliente?.nome || "Cliente não encontrado",
+              clienteInfo: cliente || {},
+              advogadoId: contrato.userId,
+              advogadoNome: advogado?.nome || "Advogado não encontrado",
+              advogadoInfo: advogado || {},
+              titulo: contrato.titulo,
+              peticaoHtml: contrato.peticaoHtml,
+              procuracaoHtml: contrato.procuracaoHtml,
+              honorarioHtml: contrato.honorarioHtml,
+              dataCriacao: contrato.createdAt,
+              status: contrato.status === "concluido" ? "Ativo" : "Inativo",
+              numeroContrato: contrato.numeroContrato,
+              hash: contrato.hash,
+            };
+          })
         : [];
 
       setContratosCadastrados(contratosFormatados);
 
       const totalItensPesquisa = contratosFormatados.length;
-      const totalPaginasPesquisa = Math.ceil(totalItensPesquisa / itensPorPagina);
+      const totalPaginasPesquisa = Math.ceil(
+        totalItensPesquisa / itensPorPagina
+      );
 
       setTotalItens(totalItensPesquisa);
       setTotalPaginas(totalPaginasPesquisa);
       setPaginaAtual(1);
-
     } catch (error) {
       console.error("Erro ao pesquisar contratos:", error);
       CustomToast({
@@ -181,7 +177,6 @@ const Contratos = () => {
       setPesquisando(false);
     }
   };
-
 
   const handleExcluirContrato = async (contrato) => {
     setLoading(true);
@@ -212,7 +207,6 @@ const Contratos = () => {
     }
   };
 
-
   const handleAtualizarContrato = async () => {
     setLoading(true);
     try {
@@ -230,20 +224,20 @@ const Contratos = () => {
       const contratosAtualizados = contratosCadastrados.map((contrato) =>
         contrato.id === contratoSelecionado.id
           ? {
-            ...contrato,
-            clienteId: clienteSelecionado,
-            user_id: advogadoSelecionado,
-            titulo: tituloContrato || contrato.titulo,
-            procuracaoHtml: procuracaoHtml,
-            honorarioHtml: contratoHtml,
-            peticaoHtml: peticaoHtml,
-            clienteNome:
-              clientesCadastrados.find((c) => c.id === clienteSelecionado)
-                ?.nome || contrato.clienteNome,
-            advogadoNome:
-              usuarios.find((u) => u.id === advogadoSelecionado)?.nome ||
-              contrato.advogadoNome,
-          }
+              ...contrato,
+              clienteId: clienteSelecionado,
+              user_id: advogadoSelecionado,
+              titulo: tituloContrato || contrato.titulo,
+              procuracaoHtml: procuracaoHtml,
+              honorarioHtml: contratoHtml,
+              peticaoHtml: peticaoHtml,
+              clienteNome:
+                clientesCadastrados.find((c) => c.id === clienteSelecionado)
+                  ?.nome || contrato.clienteNome,
+              advogadoNome:
+                usuarios.find((u) => u.id === advogadoSelecionado)?.nome ||
+                contrato.advogadoNome,
+            }
           : contrato
       );
 
@@ -362,7 +356,6 @@ const Contratos = () => {
       setLoading(false);
     }
   };
-
 
   const AvancarEtapa = () => {
     if (etapaAtiva < 3) {
@@ -535,14 +528,17 @@ const Contratos = () => {
                 onChange={(e) => setAdvogadoSelecionado(e.target.value)}
               >
                 {usuarios.map((usuario) => {
-                  const isUsuarioLogado = usuario.id === (usuarioLogado?.id || null);
+                  const isUsuarioLogado =
+                    usuario.id === (usuarioLogado?.id || null);
                   return (
                     <MenuItem
                       key={usuario.id}
                       value={usuario.id}
                       style={{
                         fontWeight: isUsuarioLogado ? "bold" : "normal",
-                        backgroundColor: isUsuarioLogado ? "#e8f5e8" : "transparent",
+                        backgroundColor: isUsuarioLogado
+                          ? "#e8f5e8"
+                          : "transparent",
                       }}
                     >
                       {usuario.nome} -{" "}
@@ -644,17 +640,17 @@ const Contratos = () => {
     }
   };
 
-const handleStepClick = (stepIndex) => {
-  if (stepIndex <= etapaAtiva) {
-    setEtapaAtiva(stepIndex);
-  }
-};
+  const handleStepClick = (stepIndex) => {
+    if (stepIndex <= etapaAtiva) {
+      setEtapaAtiva(stepIndex);
+    }
+  };
 
-const handleStepClickEdicao = (stepIndex) => {
-  if (stepIndex <= etapaAtivaEdicao) {
-    setEtapaAtivaEdicao(stepIndex);
-  }
-};
+  const handleStepClickEdicao = (stepIndex) => {
+    if (stepIndex <= etapaAtivaEdicao) {
+      setEtapaAtivaEdicao(stepIndex);
+    }
+  };
 
   const fadeIn = {
     hidden: { opacity: 0 },
@@ -860,7 +856,6 @@ const handleStepClickEdicao = (stepIndex) => {
                   }}
                 />
 
-             
                 <FormControl
                   size="small"
                   sx={{
@@ -876,14 +871,17 @@ const handleStepClickEdicao = (stepIndex) => {
                   >
                     <MenuItem value="">Todos os Advogados</MenuItem>
                     {usuarios.map((usuario) => {
-                      const isUsuarioLogado = usuario.id === (usuarioLogado?.id || null);
+                      const isUsuarioLogado =
+                        usuario.id === (usuarioLogado?.id || null);
                       return (
                         <MenuItem
                           key={usuario.id}
                           value={usuario.id}
                           style={{
                             fontWeight: isUsuarioLogado ? "bold" : "normal",
-                            backgroundColor: isUsuarioLogado ? "#e8f5e8" : "transparent",
+                            backgroundColor: isUsuarioLogado
+                              ? "#e8f5e8"
+                              : "transparent",
                           }}
                         >
                           {usuario.nome}
@@ -903,57 +901,67 @@ const handleStepClickEdicao = (stepIndex) => {
                 />
               </div>
 
-              <div className="w-full flex-1">{loading ? (
-                <div className="w-full flex items-center h-[300px] flex-col gap-3 justify-center">
-                  <TableLoading />
-                  <label className="text-xs text-primary">
-                    {pesquisando ? "Pesquisando..." : "Carregando Informações!"}
-                  </label>
-                </div>
-              ) : dadosParaTabela.length > 0 ? (
-                <TableComponent
-                  headers={contratoCadastrados}
-                  rows={cadastrosContratos(dadosParaTabela)}
-                  actionsLabel={"Ações"}
-                  actionCalls={{
-                    edit: (row) => handleEditarContrato(row),
-                    delete: (row) => handleExcluirContrato(row),
-                  }}
-                  paginacao={
-                    pesquisar
-                      ? {
-                        paginaAtual: paginaAtual,
-                        itensPorPagina: itensPorPagina,
-                        totalItens: totalItens,
-                        totalPaginas: totalPaginas,
-                        onMudarPagina: (novaPagina, novosItensPorPagina) => {
-                          if (novosItensPorPagina && novosItensPorPagina !== itensPorPagina) {
-                            setItensPorPagina(novosItensPorPagina);
-                            setPaginaAtual(1);
-                          } else {
-                            setPaginaAtual(novaPagina);
+              <div className="w-full flex-1">
+                {loading ? (
+                  <div className="w-full flex items-center h-[300px] flex-col gap-3 justify-center">
+                    <TableLoading />
+                    <label className="text-xs text-primary">
+                      {pesquisando
+                        ? "Pesquisando..."
+                        : "Carregando Informações!"}
+                    </label>
+                  </div>
+                ) : dadosParaTabela.length > 0 ? (
+                  <TableComponent
+                    headers={contratoCadastrados}
+                    rows={cadastrosContratos(dadosParaTabela)}
+                    actionsLabel={"Ações"}
+                    actionCalls={{
+                      edit: (row) => handleEditarContrato(row),
+                      delete: (row) => handleExcluirContrato(row),
+                    }}
+                    paginacao={
+                      pesquisar
+                        ? {
+                            paginaAtual: paginaAtual,
+                            itensPorPagina: itensPorPagina,
+                            totalItens: totalItens,
+                            totalPaginas: totalPaginas,
+                            onMudarPagina: (
+                              novaPagina,
+                              novosItensPorPagina
+                            ) => {
+                              if (
+                                novosItensPorPagina &&
+                                novosItensPorPagina !== itensPorPagina
+                              ) {
+                                setItensPorPagina(novosItensPorPagina);
+                                setPaginaAtual(1);
+                              } else {
+                                setPaginaAtual(novaPagina);
+                              }
+                            },
                           }
-                        },
-                      }
-                      : {
-                        paginaAtual: paginaAtual,
-                        itensPorPagina: itensPorPagina,
-                        totalItens: totalItens,
-                        totalPaginas: totalPaginas,
-                        onMudarPagina: handleMudarPagina,
-                      }
-                  }
-                />
-              ) : (
-                <div className="text-center flex items-center w-full mt-28 justify-center gap-5 flex-col text-primary">
-                  <TableLoading />
-                  <label className="text-sm">
-                    {pesquisar || filtroAdvogado !== ""
-                      ? "Nenhum contrato encontrado para sua pesquisa!"
-                      : "Nenhum contrato cadastrado!"}
-                  </label>
-                </div>
-              )}</div>
+                        : {
+                            paginaAtual: paginaAtual,
+                            itensPorPagina: itensPorPagina,
+                            totalItens: totalItens,
+                            totalPaginas: totalPaginas,
+                            onMudarPagina: handleMudarPagina,
+                          }
+                    }
+                  />
+                ) : (
+                  <div className="text-center flex items-center w-full mt-28 justify-center gap-5 flex-col text-primary">
+                    <TableLoading />
+                    <label className="text-sm">
+                      {pesquisar || filtroAdvogado !== ""
+                        ? "Nenhum contrato encontrado para sua pesquisa!"
+                        : "Nenhum contrato cadastrado!"}
+                    </label>
+                  </div>
+                )}
+              </div>
 
               <CentralModal
                 tamanhoTitulo={"81%"}
@@ -968,30 +976,37 @@ const handleStepClickEdicao = (stepIndex) => {
                 title="Cadastrar Novo Contrato"
               >
                 <div className="overflow-y-auto overflow-x-hidden h-full">
-                 <Box sx={{ width: "100%", mb: 2 }}>
-  <Stepper activeStep={etapaAtiva}>
-    {[0, 1, 2, 3].map((stepIndex) => (
-      <Step key={stepIndex} onClick={() => handleStepClick(stepIndex)}>
-        <StepLabel
-          sx={{
-            cursor: etapaAtiva >= stepIndex ? 'pointer' : 'default',
-            '& .MuiStepLabel-label': {
-              '&:hover': etapaAtiva >= stepIndex ? { 
-                color: 'primary.main',
-                opacity: 0.8 
-              } : {}
-            }
-          }}
-        >
-          {stepIndex === 0 && "Seleção"}
-          {stepIndex === 1 && "Peticao"}
-          {stepIndex === 2 && "Contrato"}
-          {stepIndex === 3 && "Procuração"}
-        </StepLabel>
-      </Step>
-    ))}
-  </Stepper>
-</Box>
+                  <Box sx={{ width: "100%", mb: 2 }}>
+                    <Stepper activeStep={etapaAtiva}>
+                      {[0, 1, 2, 3].map((stepIndex) => (
+                        <Step
+                          key={stepIndex}
+                          onClick={() => handleStepClick(stepIndex)}
+                        >
+                          <StepLabel
+                            sx={{
+                              cursor:
+                                etapaAtiva >= stepIndex ? "pointer" : "default",
+                              "& .MuiStepLabel-label": {
+                                "&:hover":
+                                  etapaAtiva >= stepIndex
+                                    ? {
+                                        color: "primary.main",
+                                        opacity: 0.8,
+                                      }
+                                    : {},
+                              },
+                            }}
+                          >
+                            {stepIndex === 0 && "Seleção"}
+                            {stepIndex === 1 && "Peticao"}
+                            {stepIndex === 2 && "Contrato"}
+                            {stepIndex === 3 && "Procuração"}
+                          </StepLabel>
+                        </Step>
+                      ))}
+                    </Stepper>
+                  </Box>
                   {renderizarConteudoEtapa()}
 
                   <div className="flex w-[100%] items-end justify-between mt-4">
@@ -1040,30 +1055,39 @@ const handleStepClickEdicao = (stepIndex) => {
                 title={`Editar Contrato - ${contratoSelecionado?.titulo || ""}`}
               >
                 <div className="overflow-y-auto overflow-x-hidden h-full">
-               <Box sx={{ width: "100%", mb: 2 }}>
-  <Stepper activeStep={etapaAtivaEdicao}>
-    {[0, 1, 2, 3].map((stepIndex) => (
-      <Step key={stepIndex} onClick={() => handleStepClickEdicao(stepIndex)}>
-        <StepLabel
-          sx={{
-            cursor: etapaAtivaEdicao >= stepIndex ? 'pointer' : 'default',
-            '& .MuiStepLabel-label': {
-              '&:hover': etapaAtivaEdicao >= stepIndex ? { 
-                color: 'primary.main',
-                opacity: 0.8 
-              } : {}
-            }
-          }}
-        >
-          {stepIndex === 0 && "Seleção"}
-          {stepIndex === 1 && "Peticao"}
-          {stepIndex === 2 && "Contrato"}
-          {stepIndex === 3 && "Procuração"}
-        </StepLabel>
-      </Step>
-    ))}
-  </Stepper>
-</Box>
+                  <Box sx={{ width: "100%", mb: 2 }}>
+                    <Stepper activeStep={etapaAtivaEdicao}>
+                      {[0, 1, 2, 3].map((stepIndex) => (
+                        <Step
+                          key={stepIndex}
+                          onClick={() => handleStepClickEdicao(stepIndex)}
+                        >
+                          <StepLabel
+                            sx={{
+                              cursor:
+                                etapaAtivaEdicao >= stepIndex
+                                  ? "pointer"
+                                  : "default",
+                              "& .MuiStepLabel-label": {
+                                "&:hover":
+                                  etapaAtivaEdicao >= stepIndex
+                                    ? {
+                                        color: "primary.main",
+                                        opacity: 0.8,
+                                      }
+                                    : {},
+                              },
+                            }}
+                          >
+                            {stepIndex === 0 && "Seleção"}
+                            {stepIndex === 1 && "Peticao"}
+                            {stepIndex === 2 && "Contrato"}
+                            {stepIndex === 3 && "Procuração"}
+                          </StepLabel>
+                        </Step>
+                      ))}
+                    </Stepper>
+                  </Box>
 
                   {renderizarConteudoEtapaEdicao(true)}
 

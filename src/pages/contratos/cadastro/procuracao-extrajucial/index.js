@@ -11,8 +11,6 @@ import {
   Select,
 } from "@mui/material";
 import {
-  Save,
-  Print,
   Download,
   FormatBold,
   FormatItalic,
@@ -21,8 +19,6 @@ import {
   FormatAlignCenter,
   FormatAlignRight,
   FormatAlignJustify,
-  TableChart,
-  Title,
 } from "@mui/icons-material";
 import html2pdf from "html2pdf.js";
 
@@ -34,9 +30,6 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderlined, setIsUnderlined] = useState(false);
-  const [tableDialogOpen, setTableDialogOpen] = useState(false);
-  const [rows, setRows] = useState(3);
-  const [cols, setCols] = useState(2);
 
   useEffect(() => {
     if (editorRef.current) {

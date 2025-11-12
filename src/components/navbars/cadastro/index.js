@@ -3,7 +3,6 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ButtonComponent from "../../button";
 import { useNavigate, useLocation } from "react-router-dom";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import { Article } from "@mui/icons-material";
 
 const HeaderCadastro = () => {
   const navigate = useNavigate();

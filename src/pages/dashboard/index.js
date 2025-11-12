@@ -6,7 +6,6 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import DescriptionIcon from "@mui/icons-material/Description";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { buscarClientes } from "../../services/get/cliente";
 import { useEffect, useState } from "react";
 import { numeroContratos } from "../../services/get/numero-contratos";
