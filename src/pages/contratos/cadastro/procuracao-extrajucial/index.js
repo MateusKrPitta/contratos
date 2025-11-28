@@ -165,8 +165,7 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
     </tr>
   </table>
 
-    <div style="font-size: 14px; font-family: 'Times'; text-align: justify;  margin-bottom: 20px; text-decoration: underline;">
-    <strong>PODERES:</strong> Amplos e ilimitados poderes para representar o Outorgante perante todo e qualquer órgão do <strong style="text-decoration: underline">SISTEMA NACIONAL DE TRÂNSITO</strong>, em defesas, recursos, contestação e pedido de reconsideração, em 1ª e 2ª instâncias, em autuações e/ou penalidades relativas à infrações de trânsito e/ou restrição a direitos, registradas nos órgãos acima mencionados, para tanto podendo: pedir e receber cópias de documentos, inclusive de Autos de Infrações Originais e Processos Administrativos; proceder verificações e contestar registro de autos infração de trânsito e penalidades, existentes contra veículos de propriedade ou conduzido pelo(a) Outorgante, protocolizar e providenciar registros para protocolos, verificar e conhecer de fatos e de registros de interesse sobre veículos e condução destes quando se relacione com os interesses do(a) Outorgante, consoante ao  <strong style="text-decoration: underline">TRÂNSITO LOCAL, ESTADUAL OU NACIONAL</strong>, podendo este mandato ser substabelecida com ou sem resenva de poderes.<strong style="text-decoration: underline"> Por tais atos o Outorgante, desde já, os tem como firmes e valiosos na forma da Lei.</strong>
+    <strong>PODERES:</strong> Amplos e ilimitados poderes para representar o Outorgante perante todo e qualquer órgão do <strong >SISTEMA NACIONAL DE TRÂNSITO</strong>, em defesas, recursos, contestação e pedido de reconsideração, em 1ª e 2ª instâncias, em autuações e/ou penalidades relativas à infrações de trânsito e/ou restrição a direitos, registradas nos órgãos acima mencionados, para tanto podendo: pedir e receber cópias de documentos, inclusive de Autos de Infrações Originais e Processos Administrativos; proceder verificações e contestar registro de autos infração de trânsito e penalidades, existentes contra veículos de propriedade ou conduzido pelo(a) Outorgante, protocolizar e providenciar registros para protocolos, verificar e conhecer de fatos e de registros de interesse sobre veículos e condução destes quando se relacione com os interesses do(a) Outorgante, consoante ao  <strong >TRÂNSITO LOCAL, ESTADUAL OU NACIONAL</strong>, podendo este mandato ser substabelecida com ou sem resenva de poderes.<strong > Por tais atos o Outorgante, desde já, os tem como firmes e valiosos na forma da Lei.</strong>
   </div>
  <div style="font-size: 14px; font-family: 'Times'; text-align: justify; margin-bottom: 20px;">
     <strong> DOURADOS MS, ${new Date().toLocaleDateString("pt-BR", {
@@ -181,7 +180,7 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
     <!-- Nome e CPF à esquerda -->
     <div style="flex: 1;">
       <div style="font-size: 14px; font-family: 'Times'; margin-bottom: 40px; position: relative; margin-top:45px">
-      <div style="border-bottom: 1px solid #000; width: 35%; margin-top: 5px; "></div> 
+      <div style="border-bottom: 1px solid #000; width: 75%; margin-top: 5px; "></div> 
       <strong>NOME: ${cliente?.nome || "NÃO INFORMADO"}</strong>
         <!-- Linha para assinatura manual -->
         
