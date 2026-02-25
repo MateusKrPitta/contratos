@@ -657,7 +657,7 @@ const Cliente = () => {
                       onChange={(e) => setProfissao(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
                       }}
                       InputProps={{
                         startAdornment: (

@@ -113,8 +113,7 @@ const Contratos = () => {
 
     try {
       const response = await buscarClientesId(clienteId);
-      // Ajuste conforme a estrutura da resposta da sua API
-      const clienteData = response?.data || response;
+      const clienteData = response?.data?.data || response?.data;
       setClienteDetalhado(clienteData);
     } catch (error) {
       console.error("Erro ao buscar detalhes do cliente:", error);
@@ -681,7 +680,7 @@ const Contratos = () => {
           <div className="mt-4">
             <PeticaoDocumento
               onConteudoChange={setPeticaoHtml}
-              cliente={clientesArray.find((c) => c.id === clienteSelecionado)}
+              cliente={clienteDetalhado}
               advogado={usuariosArray.find((a) => a.id === advogadoSelecionado)}
             />
           </div>
@@ -699,7 +698,7 @@ const Contratos = () => {
           <div className="mt-4">
             <ContratoHonorario
               onConteudoChange={setContratoHtml}
-              cliente={clienteObj}
+              cliente={clienteDetalhado}
               advogado={advogadoObj}
               editavel={true}
             />
@@ -718,7 +717,7 @@ const Contratos = () => {
           <div className="mt-4">
             <ProcuracaoExtrajudicial
               onConteudoChange={setProcuracaoHtml}
-              cliente={clienteSelecionadoObj}
+              cliente={clienteDetalhado}
               advogado={advogadoSelecionadoObj}
             />
           </div>
@@ -829,7 +828,7 @@ const Contratos = () => {
           <div className="mt-4">
             <PeticaoDocumentoEditar
               onConteudoChange={setPeticaoHtml}
-              cliente={clientesArray.find((c) => c.id === clienteSelecionado)}
+              cliente={clienteDetalhado}
               advogado={usuariosArray.find((a) => a.id === advogadoSelecionado)}
               conteudoInicial={contratoSelecionado?.peticaoHtml || ""}
             />
@@ -850,7 +849,7 @@ const Contratos = () => {
           <div className="mt-4">
             <ContratoHonorarioEditar
               onConteudoChange={setContratoHtml}
-              cliente={clienteParaEdicao}
+              cliente={clienteDetalhado}
               advogado={advogadoParaEdicao}
               conteudoInicial={contratoHonorarioHtml}
             />
@@ -863,7 +862,7 @@ const Contratos = () => {
             <div className="mt-4">
               <ProcuracaoExtrajudicialEditar
                 onConteudoChange={setProcuracaoHtml}
-                cliente={clientesArray.find((c) => c.id === clienteSelecionado)}
+                cliente={clienteDetalhado}
                 advogado={usuariosArray.find(
                   (a) => a.id === advogadoSelecionado,
                 )}
