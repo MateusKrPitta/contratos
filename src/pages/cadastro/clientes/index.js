@@ -56,8 +56,11 @@ const Cliente = () => {
   const [profissao, setProfissao] = useState("");
   const [bairro, setBairro] = useState("");
   const [nomeCompleto, setNomeCompleto] = useState("");
-  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [pagina, setPagina] = useState(1);
+  const [itensPorPagina, setItensPorPagina] = useState(10);
+  const [totalItens, setTotalItens] = useState(0);
+  const [ultimaBusca, setUltimaBusca] = useState("");
 
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
 
@@ -80,18 +83,10 @@ const Cliente = () => {
     inputRefs.current[index] = element;
   };
 
-  const clientesFiltratos = clientesCadastrados.filter(
-    (usuario) =>
-      (usuario.nome || "").toLowerCase().includes(pesquisar.toLowerCase()) ||
-      (usuario.email || "").toLowerCase().includes(pesquisar.toLowerCase()) ||
-      (usuario.username || "").toLowerCase().includes(pesquisar.toLowerCase())
-  );
-
   const FecharCadastro = () => {
     setCadastroUsuario(false);
     setClienteEditando(null);
     setNomeCompleto("");
-    setEmail("");
     setSenha("");
     setUsername("");
     setTelefone("");
@@ -112,7 +107,6 @@ const Cliente = () => {
   const EditarOpcao = (usuario) => {
     setClienteEditando(usuario);
     setNomeCompleto(usuario.nome || "");
-    setEmail(usuario.email || "");
     setUsername(usuario.username || "");
     setTelefone(usuario.telefone || "");
     setPermissao(usuario.permissao || null);
@@ -133,7 +127,6 @@ const Cliente = () => {
     setEditando(false);
     setClienteEditando(null);
     setNomeCompleto("");
-    setEmail("");
     setSenha("");
     setUsername("");
     setTelefone("");
@@ -157,7 +150,6 @@ const Cliente = () => {
       try {
         const response = await criarCliente(
           nomeCompleto,
-          email,
           telefone,
           rg,
           cnh,
@@ -168,19 +160,11 @@ const Cliente = () => {
           estado,
           rua,
           numero,
-          bairro
+          bairro,
         );
 
-        const novoUsuario = {
-          id: clientesCadastrados.length + 1,
-          nome: nomeCompleto,
-          email: email,
-          telefone: telefone,
-          username: username,
-          permissao: permissao,
-        };
-
-        setClientesCadastrados([...clientesCadastrados, novoUsuario]);
+        // Buscar clientes novamente para atualizar a tabela
+        await buscarClienteCadastrados(pagina, pesquisar);
 
         FecharCadastro();
       } catch (error) {
@@ -198,40 +182,22 @@ const Cliente = () => {
         const response = await atualizarCliente(
           clienteEditando.id,
           nomeCompleto,
-          "",
-          email,
-          "",
-          "",
+          "", // username
+          "", // senha
+          "", // permissao
           profissao,
           cpf,
           cep,
           cidade,
           estado,
           rua,
-          numero
-        );
-        const usuariosAtualizados = clientesCadastrados.map((usuario) =>
-          usuario.id === clienteEditando.id
-            ? {
-                ...usuario,
-                nome: nomeCompleto,
-                email: email,
-                telefone: telefone,
-                rg: rg,
-                cnh: cnh,
-                profissao: profissao,
-                cpf: cpf,
-                cep: cep,
-                cidade: cidade,
-                estado: estado,
-                rua: rua,
-                numero: numero,
-                bairro: bairro,
-              }
-            : usuario
+          numero,
+          bairro,
         );
 
-        setClientesCadastrados(usuariosAtualizados);
+        // Buscar clientes novamente para atualizar a tabela
+        await buscarClienteCadastrados(pagina, pesquisar);
+
         handleCloseEdicao();
       } catch (error) {
         console.error("Erro ao atualizar cliente:", error);
@@ -246,7 +212,7 @@ const Cliente = () => {
     try {
       await deletarCliente(cliente.id);
 
-      setClientesCadastrados((prev) => prev.filter((u) => u.id !== cliente.id));
+      await buscarClienteCadastrados(pagina, pesquisar);
     } catch (error) {
       console.error("Erro ao deletar cliente:", error);
     } finally {
@@ -257,7 +223,6 @@ const Cliente = () => {
   const validarCamposCadastro = () => {
     return (
       nomeCompleto.trim() !== "" &&
-      email.trim() !== "" &&
       telefone.trim() !== "" &&
       cpf.trim() !== "" &&
       cep.trim() !== "" &&
@@ -272,7 +237,6 @@ const Cliente = () => {
   const validarCamposEdicao = () => {
     return (
       nomeCompleto.trim() !== "" &&
-      email.trim() !== "" &&
       telefone.trim() !== "" &&
       cpf.trim() !== "" &&
       cep.trim() !== "" &&
@@ -290,37 +254,24 @@ const Cliente = () => {
   };
 
   const handleCepChange = (novoCep) => {
-    console.log("CEP digitado:", novoCep);
-    console.log("CEP limpo:", novoCep.replace(/\D/g, ""));
-    console.log("Tamanho:", novoCep.replace(/\D/g, "").length);
-
     setCep(novoCep);
 
-    // Busca automaticamente quando o CEP estiver completo
     if (novoCep.replace(/\D/g, "").length === 8) {
-      console.log("Chamando handleBuscarCep...");
       handleBuscarCep(novoCep);
     }
   };
 
   const handleBuscarCep = async (cep) => {
-    console.log("Iniciando busca do CEP:", cep);
     if (cep.replace(/\D/g, "").length === 8) {
       setLoadingCep(true);
       try {
-        console.log("Fazendo requisição para ViaCEP...");
         const endereco = await buscarEnderecoPorCep(cep);
-        console.log("Resposta da API:", endereco);
 
-        // Preenche automaticamente os campos
         setRua(endereco.logradouro);
         setBairro(endereco.bairro);
         setCidade(endereco.localidade);
         setEstado(endereco.uf);
 
-        console.log("Campos preenchidos automaticamente");
-
-        // Foca no campo número após preencher o endereço
         setTimeout(() => {
           if (inputRefs.current[11]) {
             inputRefs.current[11].focus();
@@ -328,7 +279,6 @@ const Cliente = () => {
         }, 100);
       } catch (error) {
         console.error("Erro ao buscar CEP:", error);
-        alert("CEP não encontrado. Por favor, verifique o CEP digitado.");
 
         setRua("");
         setBairro("");
@@ -340,21 +290,46 @@ const Cliente = () => {
     }
   };
 
-  const buscarClienteCadastrados = async () => {
+  const buscarClienteCadastrados = async (page = 1, search = "") => {
     try {
       setLoading(true);
-      const response = await buscarClientes();
-      setClientesCadastrados(response.data || []);
+      setUltimaBusca(search);
+      const response = await buscarClientes(page, itensPorPagina, search);
+
+      if (response.data && response.data.data) {
+        setClientesCadastrados(response.data.data);
+        setTotalItens(response.data.meta.total);
+      } else {
+        setClientesCadastrados(response.data || []);
+        setTotalItens(response.data?.length || 0);
+      }
     } catch (error) {
-      const errorMessage = error.response?.data?.errors?.nome;
+      console.error("Erro ao buscar clientes:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleMudarPagina = (novaPagina, novoLimite = itensPorPagina) => {
+    setPagina(novaPagina);
+    if (novoLimite !== itensPorPagina) {
+      setItensPorPagina(novoLimite);
+    }
+    buscarClienteCadastrados(novaPagina, pesquisar);
+  };
+
   useEffect(() => {
-    buscarClienteCadastrados();
-  }, []);
+    buscarClienteCadastrados(pagina, pesquisar);
+  }, [pagina, itensPorPagina]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPagina(1); // Volta para primeira página ao pesquisar
+      buscarClienteCadastrados(1, pesquisar);
+    }, 500); // Aguarda 500ms após digitar
+
+    return () => clearTimeout(timer);
+  }, [pesquisar]);
 
   return (
     <div className="flex w-full ">
@@ -415,11 +390,17 @@ const Cliente = () => {
                       Carregando Informações !
                     </label>
                   </div>
-                ) : clientesFiltratos.length > 0 ? (
+                ) : clientesCadastrados.length > 0 ? (
                   <TableComponent
-                    showPagination={false}
+                    showPagination={true}
+                    paginacao={{
+                      paginaAtual: pagina,
+                      itensPorPagina: itensPorPagina,
+                      totalItens: totalItens,
+                      onMudarPagina: handleMudarPagina,
+                    }}
                     headers={clientesCadastradosNovos}
-                    rows={cadastrosCliente(clientesFiltratos)}
+                    rows={cadastrosCliente(clientesCadastrados)}
                     actionsLabel={"Ações"}
                     actionCalls={{
                       edit: (usuario) => EditarOpcao(usuario),
@@ -443,13 +424,13 @@ const Cliente = () => {
                 maxHeight={"90vh"}
                 top={"20%"}
                 left={"28%"}
-                width={"500px"}
+                width={"600px"}
                 icon={<AddCircleOutlineIcon fontSize="small" />}
                 open={cadastroUsuario}
                 onClose={FecharCadastro}
                 title="Cadastrar Cliente"
               >
-                <div className="overflow-y-auto overflow-x-hidden max-h-[300px]">
+                <div className="overflow-y-auto overflow-x-hidden max-h-[500px]">
                   <div className="mt-4 flex gap-3 flex-wrap">
                     <TextField
                       inputRef={(el) => registerInput(0, el)}
@@ -463,64 +444,12 @@ const Cliente = () => {
                       onChange={(e) => setNomeCompleto(e.target.value)}
                       autoComplete="off"
                       sx={{
-                        width: { xs: "100%", sm: "50%", md: "40%", lg: "100%" },
+                        width: { xs: "100%", sm: "50%", md: "40%", lg: "50%" },
                       }}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
                             <PersonIcon />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                    <TextField
-                      inputRef={(el) => registerInput(1, el)}
-                      onKeyDown={handleKeyDown(1)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      label="Email"
-                      name="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      autoComplete="off"
-                      sx={{
-                        width: { xs: "48%", sm: "43%", md: "45%", lg: "47%" },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <NotesIcon />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                    <MaskedFieldPhone
-                      inputRef={(el) => registerInput(2, el)}
-                      onKeyDown={handleKeyDown(2)}
-                      value={telefone}
-                      onChange={(e) => setTelefone(e.target.value)}
-                      icon={<Phone />}
-                      iconSize={24}
-                      labelSize="small"
-                      width="50%"
-                      autoComplete="off"
-                    />
-                    <TextField
-                      inputRef={(el) => registerInput(3, el)}
-                      onKeyDown={handleKeyDown(3)}
-                      size="small"
-                      label="RG"
-                      name="RG"
-                      value={rg}
-                      onChange={(e) => setRg(e.target.value)}
-                      sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <ArticleOutlined />
                           </InputAdornment>
                         ),
                       }}
@@ -535,30 +464,8 @@ const Cliente = () => {
                       icon={<ArticleOutlined />}
                       iconSize={24}
                       labelSize="small"
-                      width="50%"
+                      width="47%"
                       autoComplete="off"
-                    />
-                    <TextField
-                      inputRef={(el) => registerInput(5, el)}
-                      onKeyDown={handleKeyDown(5)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      label="Profissão"
-                      name="Profissão"
-                      value={profissao}
-                      onChange={(e) => setProfissao(e.target.value)}
-                      autoComplete="off"
-                      sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Work />
-                          </InputAdornment>
-                        ),
-                      }}
                     />
 
                     <TextField
@@ -583,7 +490,92 @@ const Cliente = () => {
                         ),
                       }}
                     />
-
+                    <TextField
+                      inputRef={(el) => registerInput(3, el)}
+                      onKeyDown={handleKeyDown(3)}
+                      size="small"
+                      label="RG"
+                      name="RG"
+                      value={rg}
+                      onChange={(e) => setRg(e.target.value)}
+                      sx={{
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <ArticleOutlined />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      inputRef={(el) => registerInput(10, el)}
+                      onKeyDown={handleKeyDown(10)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      label="Rua"
+                      name="Rua"
+                      value={rua}
+                      onChange={(e) => setRua(e.target.value)}
+                      autoComplete="off"
+                      sx={{
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LocationOnOutlined />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      inputRef={(el) => registerInput(11, el)}
+                      onKeyDown={handleKeyDown(11)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      label="Número"
+                      type="number"
+                      name="Número"
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
+                      autoComplete="off"
+                      sx={{
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "47%" },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Numbers />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                    <TextField
+                      inputRef={(el) => registerInput(12, el)}
+                      onKeyDown={handleKeyDown(12)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      label="Bairro"
+                      name="Bairro"
+                      value={bairro}
+                      onChange={(e) => setBairro(e.target.value)}
+                      autoComplete="off"
+                      sx={{
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <LocationOnOutlined />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
                     <MaskedFieldCep
                       inputRef={(el) => registerInput(7, el)}
                       onKeyDown={handleKeyDown(7)}
@@ -593,7 +585,7 @@ const Cliente = () => {
                       iconSize={24}
                       labelSize="small"
                       width="47%"
-                      disabled={loadingCep} // Usa loadingCep aqui
+                      disabled={loadingCep}
                     />
                     <TextField
                       inputRef={(el) => registerInput(8, el)}
@@ -641,17 +633,28 @@ const Cliente = () => {
                         ),
                       }}
                     />
+                    <MaskedFieldPhone
+                      inputRef={(el) => registerInput(2, el)}
+                      onKeyDown={handleKeyDown(2)}
+                      value={telefone}
+                      onChange={(e) => setTelefone(e.target.value)}
+                      icon={<Phone />}
+                      iconSize={24}
+                      labelSize="small"
+                      width="50%"
+                      autoComplete="off"
+                    />
 
                     <TextField
-                      inputRef={(el) => registerInput(10, el)}
-                      onKeyDown={handleKeyDown(10)}
+                      inputRef={(el) => registerInput(5, el)}
+                      onKeyDown={handleKeyDown(5)}
                       fullWidth
                       variant="outlined"
                       size="small"
-                      label="Rua"
-                      name="Rua"
-                      value={rua}
-                      onChange={(e) => setRua(e.target.value)}
+                      label="Profissão"
+                      name="Profissão"
+                      value={profissao}
+                      onChange={(e) => setProfissao(e.target.value)}
                       autoComplete="off"
                       sx={{
                         width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
@@ -659,54 +662,7 @@ const Cliente = () => {
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <LocationOnOutlined />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-
-                    <TextField
-                      inputRef={(el) => registerInput(11, el)}
-                      onKeyDown={handleKeyDown(11)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      label="Número"
-                      type="number"
-                      name="Número"
-                      value={numero}
-                      onChange={(e) => setNumero(e.target.value)}
-                      autoComplete="off"
-                      sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "25%" },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Numbers />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-
-                    <TextField
-                      inputRef={(el) => registerInput(12, el)}
-                      onKeyDown={handleKeyDown(12)}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      label="Bairro"
-                      name="Bairro"
-                      value={bairro}
-                      onChange={(e) => setBairro(e.target.value)}
-                      autoComplete="off"
-                      sx={{
-                        width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
-                      }}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <LocationOnOutlined />
+                            <Work />
                           </InputAdornment>
                         ),
                       }}
@@ -762,28 +718,7 @@ const Cliente = () => {
                           ),
                         }}
                       />
-                      <TextField
-                        inputRef={(el) => registerInput(1, el)}
-                        onKeyDown={handleKeyDown(1)}
-                        fullWidth
-                        variant="outlined"
-                        size="small"
-                        label="Email"
-                        name="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        autoComplete="off"
-                        sx={{
-                          width: { xs: "48%", sm: "43%", md: "45%", lg: "47%" },
-                        }}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <NotesIcon />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
+
                       <MaskedFieldPhone
                         inputRef={(el) => registerInput(2, el)}
                         onKeyDown={handleKeyDown(2)}
@@ -882,7 +817,7 @@ const Cliente = () => {
                         icon={<LocationCity />}
                         iconSize={24}
                         labelSize="small"
-                        width="49%"
+                        width="47%"
                         disabled={loadingCep}
                       />
 

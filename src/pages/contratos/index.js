@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Navbar from "../../components/navbars/header";
 import HeaderPerfil from "../../components/navbars/perfil";
 import ButtonComponent from "../../components/button";
@@ -29,7 +29,6 @@ import TableLoading from "../../components/loading/loading-table/loading";
 import TableComponent from "../../components/table";
 import { contratoCadastrados } from "../../entities/header/contrato";
 import { cadastrosContratos } from "../../entities/class/contrato";
-import { buscarClientes } from "../../services/get/cliente";
 import { buscarUsuarios } from "../../services/get/usuario";
 import ContratoHonorario from "./cadastro/contrato-honorario";
 import ProcuracaoExtrajudicial from "./cadastro/procuracao-extrajucial";
@@ -43,9 +42,12 @@ import { atualizarContrato } from "../../services/put/contrato";
 import { pesquisaContratos } from "../../services/get/pesquisa-contratos";
 import { deletarContrato } from "../../services/delete/contrato";
 import { buscarContratosAdvogado } from "../../services/get/busca-contratos-id-advogado";
+import { buscarTodosClientes } from "../../services/get/todos-clientes";
+import { buscarClientesId } from "../../services/get/cliente-id";
 
 const Contratos = () => {
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [cadastroContrato, setCadastroContrato] = useState(false);
   const [EditarContrato, setEditarContrato] = useState(false);
   const [pesquisar, setPesquisar] = useState("");
@@ -63,36 +65,150 @@ const Contratos = () => {
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [contratosCadastrados, setContratosCadastrados] = useState([]);
-
+  const [clienteDetalhado, setClienteDetalhado] = useState(null);
   const [contratoSelecionado, setContratoSelecionado] = useState(null);
   const [filtroAdvogado, setFiltroAdvogado] = useState("");
   const [usuarioLogado, setUsuarioLogado] = useState(null);
 
-  const [paginaAtual, setPaginaAtual] = useState(1);
-  const [itensPorPagina, setItensPorPagina] = useState(5);
-  const [totalItens, setTotalItens] = useState(0);
-  const [totalPaginas, setTotalPaginas] = useState(0);
+  const [paginacao, setPaginacao] = useState({
+    paginaAtual: 1,
+    itensPorPagina: 5,
+    totalItens: 0,
+    totalPaginas: 0,
+  });
 
-  useEffect(() => {
-    if (filtroAdvogado && !pesquisar) {
-      buscarContratosAdvogadoLogado(1, itensPorPagina);
+  const searchTimeout = useRef(null);
+
+  const carregarDadosIniciais = useCallback(async () => {
+    try {
+      setInitialLoading(true);
+
+      const [clientesResponse, usuariosResponse] = await Promise.all([
+        buscarTodosClientes(), // Alterado de buscarClientes para buscarTodosClientes
+        buscarUsuarios(),
+      ]);
+
+      // A estrutura de resposta do buscarTodosClientes é diferente
+      const clientesData =
+        clientesResponse?.data?.data || clientesResponse?.data || [];
+      setClientesCadastrados(Array.isArray(clientesData) ? clientesData : []);
+
+      setUsuarios(usuariosResponse?.data || []);
+    } catch (error) {
+      console.error("Erro ao carregar dados iniciais:", error);
+      CustomToast({
+        type: "error",
+        message: "Erro ao carregar dados. Tente novamente.",
+      });
+    } finally {
+      setInitialLoading(false);
     }
-  }, [filtroAdvogado]);
-  const obterDadosPaginados = () => {
-    return contratosCadastrados;
+  }, []);
+
+  const buscarDetalhesCliente = useCallback(async (clienteId) => {
+    if (!clienteId) {
+      setClienteDetalhado(null);
+      return;
+    }
+
+    try {
+      const response = await buscarClientesId(clienteId);
+      // Ajuste conforme a estrutura da resposta da sua API
+      const clienteData = response?.data || response;
+      setClienteDetalhado(clienteData);
+    } catch (error) {
+      console.error("Erro ao buscar detalhes do cliente:", error);
+      setClienteDetalhado(null);
+      CustomToast({
+        type: "error",
+        message: "Erro ao carregar detalhes do cliente.",
+      });
+    }
+  }, []);
+
+  const buscarTodosClientesCadastrados = async () => {
+    try {
+      const response = await buscarTodosClientes();
+      // Acessa corretamente a estrutura aninhada
+      const clientes = response?.data?.data || response?.data || [];
+      setClientesCadastrados(Array.isArray(clientes) ? clientes : []);
+    } catch (error) {
+      console.error("Erro ao buscar clientes:", error);
+      setClientesCadastrados([]);
+    }
   };
 
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      if (pesquisar.trim() !== "") {
-        handlePesquisaContratos(pesquisar);
-      } else {
-        buscarContratosAdvogadoLogado(1, itensPorPagina);
-      }
-    }, 500);
+  const buscarContratosAdvogadoLogado = useCallback(
+    async (page = 1, perPage = 5) => {
+      try {
+        setLoading(true);
 
-    return () => clearTimeout(delayDebounceFn);
-  }, [pesquisar]);
+        const usuarioSession = sessionStorage.getItem("user");
+        if (!usuarioSession) {
+          throw new Error("Usuário não encontrado no sessionStorage");
+        }
+
+        const usuario = JSON.parse(usuarioSession);
+        const userId = usuario.id;
+
+        const response = await buscarContratosAdvogado(userId, page, perPage);
+
+        const responseData = response?.data || {};
+        const meta = responseData.meta || {};
+        const dados = responseData.data || [];
+
+        const contratosFormatados = dados.map((contrato) => {
+          const clienteInfo = contrato.cliente || {};
+          const advogadoInfo = contrato.user || {};
+
+          return {
+            id: contrato.id,
+            clienteId: contrato.clienteId,
+            clienteNome: clienteInfo.nome || "Cliente não encontrado",
+            clienteInfo: clienteInfo,
+            advogadoId: contrato.userId,
+            advogadoNome: advogadoInfo.nome || "Advogado não encontrado",
+            advogadoInfo: advogadoInfo,
+            titulo: contrato.titulo,
+            peticaoHtml: contrato.peticaoHtml,
+            procuracaoHtml: contrato.procuracaoHtml,
+            honorarioHtml: contrato.honorarioHtml,
+            dataCriacao: contrato.createdAt,
+            status: contrato.status === "concluido" ? "Ativo" : "Inativo",
+            numeroContrato: contrato.numeroContrato,
+            hash: contrato.hash,
+          };
+        });
+
+        setContratosCadastrados(contratosFormatados);
+        setPaginacao({
+          paginaAtual: meta.currentPage || page,
+          itensPorPagina: meta.perPage || perPage,
+          totalItens: meta.total || 0,
+          totalPaginas: meta.lastPage || 1,
+        });
+      } catch (error) {
+        console.error("Erro ao buscar contratos do advogado:", error);
+        setContratosCadastrados([]);
+        setPaginacao((prev) => ({
+          ...prev,
+          totalItens: 0,
+          totalPaginas: 1,
+        }));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (clienteSelecionado) {
+      buscarDetalhesCliente(clienteSelecionado);
+    } else {
+      setClienteDetalhado(null);
+    }
+  }, [clienteSelecionado, buscarDetalhesCliente]);
 
   useEffect(() => {
     const usuarioSession = sessionStorage.getItem("user");
@@ -106,10 +222,66 @@ const Contratos = () => {
       }
     }
 
-    buscarClienteCadastrados();
-    buscarUsuariosCadastradas();
-    buscarContratosAdvogadoLogado(paginaAtual, itensPorPagina);
-  }, [paginaAtual, itensPorPagina]);
+    // Primeiro carrega os dados iniciais
+    carregarDadosIniciais().then(() => {
+      // Depois busca os clientes completos
+      buscarTodosClientesCadastrados();
+    });
+  }, [carregarDadosIniciais]);
+  // Efeito para carregar contratos após dados iniciais
+  useEffect(() => {
+    if (!initialLoading && usuarioLogado) {
+      buscarContratosAdvogadoLogado(
+        paginacao.paginaAtual,
+        paginacao.itensPorPagina,
+      );
+    }
+  }, [
+    initialLoading,
+    usuarioLogado,
+    paginacao.paginaAtual,
+    paginacao.itensPorPagina,
+    buscarContratosAdvogadoLogado,
+  ]);
+
+  // Efeito para filtro por advogado
+  useEffect(() => {
+    if (filtroAdvogado && !pesquisar && !initialLoading) {
+      buscarContratosAdvogadoLogado(1, paginacao.itensPorPagina);
+    }
+  }, [
+    filtroAdvogado,
+    pesquisar,
+    initialLoading,
+    buscarContratosAdvogadoLogado,
+    paginacao.itensPorPagina,
+  ]);
+
+  // Efeito para pesquisa com debounce
+  useEffect(() => {
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+
+    if (pesquisar.trim() !== "") {
+      searchTimeout.current = setTimeout(() => {
+        handlePesquisaContratos(pesquisar);
+      }, 500);
+    } else if (!initialLoading) {
+      buscarContratosAdvogadoLogado(1, paginacao.itensPorPagina);
+    }
+
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+    };
+  }, [
+    pesquisar,
+    initialLoading,
+    paginacao.itensPorPagina,
+    buscarContratosAdvogadoLogado,
+  ]);
 
   const handlePesquisaContratos = async (termo) => {
     try {
@@ -117,32 +289,22 @@ const Contratos = () => {
       setLoading(true);
 
       const response = await pesquisaContratos(termo);
-      const dados =
-        response?.data?.data ||
-        response?.data?.data?.data ||
-        response?.data ||
-        response ||
-        [];
-
-      const clientesResponse = await buscarClientes();
-      const usuariosResponse = await buscarUsuarios();
-
-      const clientes = clientesResponse?.data || [];
-      const usuariosList = usuariosResponse?.data || [];
+      const responseData = response?.data || {};
+      const dados = responseData.data || responseData || [];
 
       const contratosFormatados = Array.isArray(dados)
         ? dados.map((contrato) => {
-            const cliente = clientes.find((c) => c.id === contrato.clienteId);
-            const advogado = usuariosList.find((u) => u.id === contrato.userId);
+            const clienteInfo = contrato.cliente || {};
+            const advogadoInfo = contrato.user || {};
 
             return {
               id: contrato.id,
               clienteId: contrato.clienteId,
-              clienteNome: cliente?.nome || "Cliente não encontrado",
-              clienteInfo: cliente || {},
+              clienteNome: clienteInfo.nome || "Cliente não encontrado",
+              clienteInfo: clienteInfo,
               advogadoId: contrato.userId,
-              advogadoNome: advogado?.nome || "Advogado não encontrado",
-              advogadoInfo: advogado || {},
+              advogadoNome: advogadoInfo.nome || "Advogado não encontrado",
+              advogadoInfo: advogadoInfo,
               titulo: contrato.titulo,
               peticaoHtml: contrato.peticaoHtml,
               procuracaoHtml: contrato.procuracaoHtml,
@@ -156,22 +318,20 @@ const Contratos = () => {
         : [];
 
       setContratosCadastrados(contratosFormatados);
-
-      const totalItensPesquisa = contratosFormatados.length;
-      const totalPaginasPesquisa = Math.ceil(
-        totalItensPesquisa / itensPorPagina
-      );
-
-      setTotalItens(totalItensPesquisa);
-      setTotalPaginas(totalPaginasPesquisa);
-      setPaginaAtual(1);
+      setPaginacao((prev) => ({
+        ...prev,
+        totalItens: contratosFormatados.length,
+        totalPaginas: Math.ceil(
+          contratosFormatados.length / prev.itensPorPagina,
+        ),
+        paginaAtual: 1,
+      }));
     } catch (error) {
       console.error("Erro ao pesquisar contratos:", error);
       CustomToast({
         type: "error",
         message: "Erro ao pesquisar contratos. Tente novamente.",
       });
-      buscarContratosAdvogadoLogado(paginaAtual, itensPorPagina);
     } finally {
       setLoading(false);
       setPesquisando(false);
@@ -182,30 +342,46 @@ const Contratos = () => {
     setLoading(true);
     try {
       await deletarContrato(contrato.id);
-
-      const contratosAtualizados = contratosCadastrados.filter(
-        (c) => c.id !== contrato.id
+      await buscarContratosAdvogadoLogado(
+        paginacao.paginaAtual,
+        paginacao.itensPorPagina,
       );
 
-      setContratosCadastrados(contratosAtualizados);
-
-      setTotalItens(totalItens - 1);
+      CustomToast({
+        type: "success",
+        message: "Contrato excluído com sucesso!",
+      });
     } catch (error) {
       console.error("Erro ao excluir contrato:", error);
+      CustomToast({
+        type: "error",
+        message: "Erro ao excluir contrato. Tente novamente.",
+      });
     } finally {
       setLoading(false);
     }
   };
-  const dadosParaTabela = obterDadosPaginados();
 
-  const handleMudarPagina = (novaPagina, novosItensPorPagina) => {
-    if (novosItensPorPagina && novosItensPorPagina !== itensPorPagina) {
-      setItensPorPagina(novosItensPorPagina);
-      buscarContratosAdvogadoLogado(1, novosItensPorPagina);
-    } else {
-      buscarContratosAdvogadoLogado(novaPagina, itensPorPagina);
-    }
-  };
+  const handleMudarPagina = useCallback(
+    (novaPagina, novosItensPorPagina) => {
+      if (
+        novosItensPorPagina &&
+        novosItensPorPagina !== paginacao.itensPorPagina
+      ) {
+        setPaginacao((prev) => ({
+          ...prev,
+          itensPorPagina: novosItensPorPagina,
+          paginaAtual: 1,
+        }));
+      } else {
+        setPaginacao((prev) => ({
+          ...prev,
+          paginaAtual: novaPagina,
+        }));
+      }
+    },
+    [paginacao.itensPorPagina],
+  );
 
   const handleAtualizarContrato = async () => {
     setLoading(true);
@@ -218,30 +394,13 @@ const Contratos = () => {
         contratoSelecionado.numeroContrato || `CTR-${Date.now()}`,
         procuracaoHtml,
         contratoHtml,
-        peticaoHtml
+        peticaoHtml,
       );
 
-      const contratosAtualizados = contratosCadastrados.map((contrato) =>
-        contrato.id === contratoSelecionado.id
-          ? {
-              ...contrato,
-              clienteId: clienteSelecionado,
-              user_id: advogadoSelecionado,
-              titulo: tituloContrato || contrato.titulo,
-              procuracaoHtml: procuracaoHtml,
-              honorarioHtml: contratoHtml,
-              peticaoHtml: peticaoHtml,
-              clienteNome:
-                clientesCadastrados.find((c) => c.id === clienteSelecionado)
-                  ?.nome || contrato.clienteNome,
-              advogadoNome:
-                usuarios.find((u) => u.id === advogadoSelecionado)?.nome ||
-                contrato.advogadoNome,
-            }
-          : contrato
+      await buscarContratosAdvogadoLogado(
+        paginacao.paginaAtual,
+        paginacao.itensPorPagina,
       );
-
-      setContratosCadastrados(contratosAtualizados);
 
       CustomToast({
         type: "success",
@@ -251,6 +410,10 @@ const Contratos = () => {
       FecharEditarContrato();
     } catch (error) {
       console.error("Erro ao atualizar contrato:", error);
+      CustomToast({
+        type: "error",
+        message: "Erro ao atualizar contrato. Tente novamente.",
+      });
     } finally {
       setLoading(false);
     }
@@ -260,9 +423,15 @@ const Contratos = () => {
     setContratoSelecionado(contrato);
     setEditarContrato(true);
 
-    setClienteSelecionado(contrato.clienteId || contrato.clienteInfo?.id || "");
+    const clienteId = contrato.clienteId || contrato.clienteInfo?.id || "";
+    setClienteSelecionado(clienteId);
+
+    if (clienteId) {
+      buscarDetalhesCliente(clienteId);
+    }
+
     setAdvogadoSelecionado(
-      contrato.advogadoId || contrato.advogadoInfo?.id || ""
+      contrato.advogadoId || contrato.advogadoInfo?.id || "",
     );
     setTituloContrato(contrato.titulo || "");
 
@@ -278,10 +447,13 @@ const Contratos = () => {
     setEtapaAtiva(0);
     setClienteSelecionado("");
     setAdvogadoSelecionado("");
-
     setTituloContrato("");
     setPeticao("");
     setProcuracao("");
+    setPeticaoHtml("");
+    setContratoHtml("");
+    setProcuracaoHtml("");
+    setClienteDetalhado(null);
   };
 
   const FecharEditarContrato = () => {
@@ -290,68 +462,63 @@ const Contratos = () => {
     setEtapaAtivaEdicao(0);
     setClienteSelecionado("");
     setAdvogadoSelecionado("");
-
     setTituloContrato("");
     setPeticaoHtml("");
     setContratoHtml("");
     setProcuracaoHtml("");
+    setClienteDetalhado(null); // Adicione esta linha
   };
 
-  const buscarContratosAdvogadoLogado = async (page = 1, perPage = 5) => {
+  const handleCadastrarContrato = async () => {
+    setLoading(true);
+
     try {
-      setLoading(true);
+      const clienteSelecionadoObj = clientesCadastrados.find(
+        (c) => c.id === clienteSelecionado,
+      );
+      const advogadoSelecionadoObj = usuarios.find(
+        (a) => a.id === advogadoSelecionado,
+      );
 
-      const usuarioSession = sessionStorage.getItem("user");
-      if (!usuarioSession) {
-        throw new Error("Usuário não encontrado no sessionStorage");
-      }
+      const dadosContrato = {
+        cliente_id: clienteSelecionado,
+        user_id: advogadoSelecionado,
+        titulo:
+          tituloContrato ||
+          `Contrato ${clienteSelecionadoObj?.nome} - ${advogadoSelecionadoObj?.nome}`,
+        numero_contrato: `CTR-${Date.now()}`,
+        procuracao_html: procuracaoHtml,
+        honorario_html: contratoHtml,
+        peticao_html: peticaoHtml,
+      };
 
-      const usuario = JSON.parse(usuarioSession);
-      const userId = usuario.id;
-      const response = await buscarContratosAdvogado(userId, page, perPage);
+      await criarContrato(
+        dadosContrato.cliente_id,
+        dadosContrato.user_id,
+        dadosContrato.titulo,
+        dadosContrato.numero_contrato,
+        dadosContrato.procuracao_html,
+        dadosContrato.honorario_html,
+        dadosContrato.peticao_html,
+      );
 
-      const dados = response?.data?.data || [];
-      const meta = response?.data?.meta || {};
+      await buscarContratosAdvogadoLogado(
+        paginacao.paginaAtual,
+        paginacao.itensPorPagina,
+      );
 
-      const clientesResponse = await buscarClientes();
-      const usuariosResponse = await buscarUsuarios();
-
-      const clientes = clientesResponse?.data || [];
-      const usuariosList = usuariosResponse?.data || [];
-
-      const contratosFormatados = dados.map((contrato) => {
-        const cliente = clientes.find((c) => c.id === contrato.clienteId);
-        const advogado = usuariosList.find((u) => u.id === contrato.userId);
-
-        return {
-          id: contrato.id,
-          clienteId: contrato.clienteId,
-          clienteNome: cliente?.nome || "Cliente não encontrado",
-          clienteInfo: cliente || {},
-          advogadoId: contrato.userId,
-          advogadoNome: advogado?.nome || "Advogado não encontrado",
-          advogadoInfo: advogado || {},
-          titulo: contrato.titulo,
-          peticaoHtml: contrato.peticaoHtml,
-          procuracaoHtml: contrato.procuracaoHtml,
-          honorarioHtml: contrato.honorarioHtml,
-          dataCriacao: contrato.createdAt,
-          status: contrato.status === "concluido" ? "Ativo" : "Inativo",
-          numeroContrato: contrato.numeroContrato,
-          hash: contrato.hash,
-        };
+      CustomToast({
+        type: "success",
+        message: "Contrato cadastrado com sucesso!",
       });
 
-      setContratosCadastrados(contratosFormatados);
-      setTotalItens(meta.total || 0);
-      setTotalPaginas(meta.lastPage || 1);
-      setPaginaAtual(meta.currentPage || 1);
-      setItensPorPagina(meta.perPage || 5);
+      FecharCadastroContrato();
     } catch (error) {
-      console.error("Erro ao buscar contratos do advogado:", error);
-      setContratosCadastrados([]);
-      setTotalItens(0);
-      setTotalPaginas(1);
+      console.error("Erro ao cadastrar contrato:", error);
+      CustomToast({
+        type: "error",
+        message: "Erro ao cadastrar contrato. Tente novamente.",
+      });
     } finally {
       setLoading(false);
     }
@@ -381,101 +548,6 @@ const Contratos = () => {
     }
   };
 
-  const buscarClienteCadastrados = async () => {
-    try {
-      setLoading(true);
-      const response = await buscarClientes();
-      setClientesCadastrados(response.data || []);
-    } catch (error) {
-      console.error("Erro ao buscar clientes:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const buscarUsuariosCadastradas = async () => {
-    try {
-      setLoading(true);
-      const response = await buscarUsuarios();
-      const usuariosData = response.data || [];
-      setUsuarios(usuariosData);
-    } catch (error) {
-      console.error("Erro ao buscar usuários:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCadastrarContrato = async () => {
-    setLoading(true);
-
-    try {
-      const clienteSelecionadoObj = clientesCadastrados.find(
-        (c) => c.id === clienteSelecionado
-      );
-      const advogadoSelecionadoObj = usuarios.find(
-        (a) => a.id === advogadoSelecionado
-      );
-
-      const dadosContrato = {
-        cliente_id: clienteSelecionado,
-        user_id: advogadoSelecionado,
-        titulo:
-          tituloContrato ||
-          `Contrato ${clienteSelecionadoObj?.nome} - ${advogadoSelecionadoObj?.nome}`,
-        numero_contrato: `CTR-${Date.now()}`,
-        procuracao_html: procuracaoHtml,
-        honorario_html: contratoHtml,
-        peticao_html: peticaoHtml,
-      };
-
-      const response = await criarContrato(
-        dadosContrato.cliente_id,
-        dadosContrato.user_id,
-        dadosContrato.titulo,
-        dadosContrato.numero_contrato,
-        dadosContrato.procuracao_html,
-        dadosContrato.honorario_html,
-        dadosContrato.peticao_html
-      );
-
-      const novoContrato = {
-        id: Date.now(),
-        clienteId: clienteSelecionado,
-        clienteNome: clienteSelecionadoObj?.nome || "",
-        clienteInfo: clienteSelecionadoObj || {},
-        advogadoId: advogadoSelecionado,
-        advogadoNome: advogadoSelecionadoObj?.nome || "",
-        advogadoInfo: advogadoSelecionadoObj || {},
-        titulo: dadosContrato.titulo,
-        peticao: peticaoHtml,
-        procuracao: procuracaoHtml,
-        contrato: contratoHtml,
-        dataCriacao: new Date().toISOString(),
-        status: "Ativo",
-        apiId: response.id || null,
-      };
-
-      const novosContratos = [...contratosCadastrados, novoContrato];
-      setContratosCadastrados(novosContratos);
-
-      CustomToast({
-        type: "success",
-        message: "Contrato cadastrado com sucesso!",
-      });
-      buscarContratosAdvogadoLogado();
-    } catch (error) {
-      console.error("Erro ao cadastrar contrato:", error);
-      CustomToast({
-        type: "error",
-        message: "Erro ao cadastrar contrato. Tente novamente.",
-      });
-    } finally {
-      setLoading(false);
-      FecharCadastroContrato();
-    }
-  };
-
   const podeAvancar = (modoEdicao = false) => {
     if (etapaAtiva === 0) {
       if (modoEdicao) {
@@ -490,7 +562,24 @@ const Contratos = () => {
     return true;
   };
 
+  const handleStepClick = (stepIndex) => {
+    if (stepIndex <= etapaAtiva) {
+      setEtapaAtiva(stepIndex);
+    }
+  };
+
+  const handleStepClickEdicao = (stepIndex) => {
+    if (stepIndex <= etapaAtivaEdicao) {
+      setEtapaAtivaEdicao(stepIndex);
+    }
+  };
+
   const renderizarConteudoEtapa = () => {
+    const clientesArray = Array.isArray(clientesCadastrados)
+      ? clientesCadastrados
+      : [];
+    const usuariosArray = Array.isArray(usuarios) ? usuarios : [];
+
     switch (etapaAtiva) {
       case 0:
         return (
@@ -498,10 +587,9 @@ const Contratos = () => {
             <Autocomplete
               fullWidth
               size="small"
-              options={clientesCadastrados}
+              options={clientesArray}
               value={
-                clientesCadastrados.find((c) => c.id === clienteSelecionado) ||
-                null
+                clientesArray.find((c) => c.id === clienteSelecionado) || null
               }
               onChange={(event, newValue) => {
                 setClienteSelecionado(newValue ? newValue.id : "");
@@ -527,7 +615,7 @@ const Contratos = () => {
                 label="Advogado"
                 onChange={(e) => setAdvogadoSelecionado(e.target.value)}
               >
-                {usuarios.map((usuario) => {
+                {usuariosArray.map((usuario) => {
                   const isUsuarioLogado =
                     usuario.id === (usuarioLogado?.id || null);
                   return (
@@ -560,52 +648,52 @@ const Contratos = () => {
               sx={{ mb: 2 }}
             />
 
-            {clienteSelecionado && (
+            {clienteDetalhado && (
               <div className="w-full p-3 bg-gray-50 rounded-md mt-2">
                 <h4 className="font-bold text-primary mb-2">
-                  Informações do Cliente:
+                  Informações Detalhadas do Cliente:
                 </h4>
-                {clientesCadastrados
-                  .filter((c) => c.id === clienteSelecionado)
-                  .map((cliente) => (
-                    <div key={cliente.id} className="text-sm">
-                      <p>
-                        <strong>Nome:</strong> {cliente.nome}
-                      </p>
-                      <p>
-                        <strong>CPF:</strong> {cliente.cpf || "Não informado"}
-                      </p>
-                      <p>
-                        <strong>Email:</strong>{" "}
-                        {cliente.email || "Não informado"}
-                      </p>
-                      <p>
-                        <strong>Telefone:</strong>{" "}
-                        {cliente.telefone || "Não informado"}
-                      </p>
-                    </div>
-                  ))}
+                <div className="text-sm">
+                  <p>
+                    <strong>Nome:</strong> {clienteDetalhado.nome}
+                  </p>
+                  <p>
+                    <strong>CPF:</strong>{" "}
+                    {clienteDetalhado.cpf || "Não informado"}
+                  </p>
+                  <p>
+                    <strong>RG:</strong>{" "}
+                    {clienteDetalhado.rg || "Não informado"}
+                  </p>
+
+                  <p>
+                    <strong>Telefone:</strong>{" "}
+                    {clienteDetalhado.telefone || "Não informado"}
+                  </p>
+                </div>
               </div>
             )}
           </div>
         );
+
       case 1:
         return (
           <div className="mt-4">
             <PeticaoDocumento
               onConteudoChange={setPeticaoHtml}
-              cliente={clientesCadastrados.find(
-                (c) => c.id === clienteSelecionado
-              )}
-              advogado={usuarios.find((a) => a.id === advogadoSelecionado)}
+              cliente={clientesArray.find((c) => c.id === clienteSelecionado)}
+              advogado={usuariosArray.find((a) => a.id === advogadoSelecionado)}
             />
           </div>
         );
+
       case 2:
-        const clienteObj = clientesCadastrados.find(
-          (c) => c.id === clienteSelecionado
+        const clienteObj = clientesArray.find(
+          (c) => c.id === clienteSelecionado,
         );
-        const advogadoObj = usuarios.find((a) => a.id === advogadoSelecionado);
+        const advogadoObj = usuariosArray.find(
+          (a) => a.id === advogadoSelecionado,
+        );
 
         return (
           <div className="mt-4">
@@ -619,11 +707,11 @@ const Contratos = () => {
         );
 
       case 3:
-        const clienteSelecionadoObj = clientesCadastrados.find(
-          (c) => c.id === clienteSelecionado
+        const clienteSelecionadoObj = clientesArray.find(
+          (c) => c.id === clienteSelecionado,
         );
-        const advogadoSelecionadoObj = usuarios.find(
-          (a) => a.id === advogadoSelecionado
+        const advogadoSelecionadoObj = usuariosArray.find(
+          (a) => a.id === advogadoSelecionado,
         );
 
         return (
@@ -635,29 +723,18 @@ const Contratos = () => {
             />
           </div>
         );
+
       default:
         return null;
     }
   };
 
-  const handleStepClick = (stepIndex) => {
-    if (stepIndex <= etapaAtiva) {
-      setEtapaAtiva(stepIndex);
-    }
-  };
-
-  const handleStepClickEdicao = (stepIndex) => {
-    if (stepIndex <= etapaAtivaEdicao) {
-      setEtapaAtivaEdicao(stepIndex);
-    }
-  };
-
-  const fadeIn = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  };
-
   const renderizarConteudoEtapaEdicao = (modoEdicao = false) => {
+    const clientesArray = Array.isArray(clientesCadastrados)
+      ? clientesCadastrados
+      : [];
+    const usuariosArray = Array.isArray(usuarios) ? usuarios : [];
+
     const contratoAtual = contratoSelecionado
       ? contratosCadastrados.find((c) => c.id === contratoSelecionado.id)
       : null;
@@ -674,7 +751,7 @@ const Contratos = () => {
                 onChange={(e) => setClienteSelecionado(e.target.value)}
                 disabled={modoEdicao}
               >
-                {clientesCadastrados.map((cliente) => (
+                {clientesArray.map((cliente) => (
                   <MenuItem key={cliente.id} value={cliente.id}>
                     {cliente.nome} - {cliente.cpf || cliente.email}
                   </MenuItem>
@@ -690,7 +767,7 @@ const Contratos = () => {
                 onChange={(e) => setAdvogadoSelecionado(e.target.value)}
                 disabled={modoEdicao}
               >
-                {usuarios.map((usuario) => {
+                {usuariosArray.map((usuario) => {
                   const isCurrent = usuario.id === advogadoSelecionado;
                   return (
                     <MenuItem
@@ -720,31 +797,28 @@ const Contratos = () => {
               sx={{ mb: 2 }}
             />
 
-            {clienteSelecionado && (
+            {clienteDetalhado && (
               <div className="w-full p-3 bg-gray-50 rounded-md mt-2">
                 <h4 className="font-bold text-primary mb-2">
-                  Informações do Cliente:
+                  Informações Detalhadas do Cliente:
                 </h4>
-                {clientesCadastrados
-                  .filter((c) => c.id === clienteSelecionado)
-                  .map((cliente) => (
-                    <div key={cliente.id} className="text-sm">
-                      <p>
-                        <strong>Nome:</strong> {cliente.nome}
-                      </p>
-                      <p>
-                        <strong>CPF:</strong> {cliente.cpf || "Não informado"}
-                      </p>
-                      <p>
-                        <strong>Email:</strong>{" "}
-                        {cliente.email || "Não informado"}
-                      </p>
-                      <p>
-                        <strong>Telefone:</strong>{" "}
-                        {cliente.telefone || "Não informado"}
-                      </p>
-                    </div>
-                  ))}
+                <div className="text-sm">
+                  <p>
+                    <strong>Nome:</strong> {clienteDetalhado.nome}
+                  </p>
+                  <p>
+                    <strong>CPF:</strong>{" "}
+                    {clienteDetalhado.cpf || "Não informado"}
+                  </p>
+                  <p>
+                    <strong>RG:</strong>{" "}
+                    {clienteDetalhado.rg || "Não informado"}
+                  </p>
+                  <p>
+                    <strong>Telefone:</strong>{" "}
+                    {clienteDetalhado.telefone || "Não informado"}
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -755,21 +829,19 @@ const Contratos = () => {
           <div className="mt-4">
             <PeticaoDocumentoEditar
               onConteudoChange={setPeticaoHtml}
-              cliente={clientesCadastrados.find(
-                (c) => c.id === clienteSelecionado
-              )}
-              advogado={usuarios.find((a) => a.id === advogadoSelecionado)}
+              cliente={clientesArray.find((c) => c.id === clienteSelecionado)}
+              advogado={usuariosArray.find((a) => a.id === advogadoSelecionado)}
               conteudoInicial={contratoSelecionado?.peticaoHtml || ""}
             />
           </div>
         );
 
       case 2:
-        const clienteParaEdicao = clientesCadastrados.find(
-          (c) => c.id === clienteSelecionado
+        const clienteParaEdicao = clientesArray.find(
+          (c) => c.id === clienteSelecionado,
         );
-        const advogadoParaEdicao = usuarios.find(
-          (a) => a.id === advogadoSelecionado
+        const advogadoParaEdicao = usuariosArray.find(
+          (a) => a.id === advogadoSelecionado,
         );
 
         const contratoHonorarioHtml = contratoSelecionado?.honorarioHtml || "";
@@ -791,10 +863,10 @@ const Contratos = () => {
             <div className="mt-4">
               <ProcuracaoExtrajudicialEditar
                 onConteudoChange={setProcuracaoHtml}
-                cliente={clientesCadastrados.find(
-                  (c) => c.id === clienteSelecionado
+                cliente={clientesArray.find((c) => c.id === clienteSelecionado)}
+                advogado={usuariosArray.find(
+                  (a) => a.id === advogadoSelecionado,
                 )}
-                advogado={usuarios.find((a) => a.id === advogadoSelecionado)}
                 conteudoInicial={
                   modoEdicao
                     ? contratoAtual?.procuracaoHtml || procuracaoHtml
@@ -805,9 +877,15 @@ const Contratos = () => {
             </div>
           </div>
         );
+
       default:
         return null;
     }
+  };
+
+  const fadeIn = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
   };
 
   return (
@@ -902,54 +980,33 @@ const Contratos = () => {
               </div>
 
               <div className="w-full flex-1">
-                {loading ? (
+                {initialLoading || loading ? (
                   <div className="w-full flex items-center h-[300px] flex-col gap-3 justify-center">
                     <TableLoading />
                     <label className="text-xs text-primary">
-                      {pesquisando
-                        ? "Pesquisando..."
-                        : "Carregando Informações!"}
+                      {initialLoading
+                        ? "Carregando dados iniciais..."
+                        : pesquisando
+                          ? "Pesquisando..."
+                          : "Carregando Informações!"}
                     </label>
                   </div>
-                ) : dadosParaTabela.length > 0 ? (
+                ) : contratosCadastrados.length > 0 ? (
                   <TableComponent
                     headers={contratoCadastrados}
-                    rows={cadastrosContratos(dadosParaTabela)}
+                    rows={cadastrosContratos(contratosCadastrados)}
                     actionsLabel={"Ações"}
                     actionCalls={{
                       edit: (row) => handleEditarContrato(row),
                       delete: (row) => handleExcluirContrato(row),
                     }}
-                    paginacao={
-                      pesquisar
-                        ? {
-                            paginaAtual: paginaAtual,
-                            itensPorPagina: itensPorPagina,
-                            totalItens: totalItens,
-                            totalPaginas: totalPaginas,
-                            onMudarPagina: (
-                              novaPagina,
-                              novosItensPorPagina
-                            ) => {
-                              if (
-                                novosItensPorPagina &&
-                                novosItensPorPagina !== itensPorPagina
-                              ) {
-                                setItensPorPagina(novosItensPorPagina);
-                                setPaginaAtual(1);
-                              } else {
-                                setPaginaAtual(novaPagina);
-                              }
-                            },
-                          }
-                        : {
-                            paginaAtual: paginaAtual,
-                            itensPorPagina: itensPorPagina,
-                            totalItens: totalItens,
-                            totalPaginas: totalPaginas,
-                            onMudarPagina: handleMudarPagina,
-                          }
-                    }
+                    paginacao={{
+                      paginaAtual: paginacao.paginaAtual,
+                      itensPorPagina: paginacao.itensPorPagina,
+                      totalItens: paginacao.totalItens,
+                      totalPaginas: paginacao.totalPaginas,
+                      onMudarPagina: handleMudarPagina,
+                    }}
                   />
                 ) : (
                   <div className="text-center flex items-center w-full mt-28 justify-center gap-5 flex-col text-primary">

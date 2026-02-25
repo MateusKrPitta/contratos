@@ -1,17 +1,12 @@
 import CustomToast from "../../components/toast";
 import httpsInstance from "../url";
 
-export const buscarClientes = async (page = 1, limit = 10, search = "") => {
+export const buscarTodosClientes = async () => {
   const https = httpsInstance();
   const token = sessionStorage.getItem("token");
 
   try {
-    let url = `/clientes?page=${page}&limit=${limit}`;
-    if (search) {
-      url += `&search=${encodeURIComponent(search)}`;
-    }
-
-    const response = await https.get(url, {
+    const response = await https.get("/clientes/simple-list", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

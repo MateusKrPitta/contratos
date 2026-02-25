@@ -3,7 +3,6 @@ import httpsInstance from "../url";
 
 export const criarCliente = async (
   nome,
-  email,
   telefone,
   rg,
   cnh,
@@ -14,7 +13,7 @@ export const criarCliente = async (
   estado,
   rua,
   numero,
-  bairro
+  bairro,
 ) => {
   const https = httpsInstance();
   const token = sessionStorage.getItem("token");
@@ -25,7 +24,6 @@ export const criarCliente = async (
   try {
     const payload = {
       nome,
-      email,
       telefone,
       rg,
       cnh,

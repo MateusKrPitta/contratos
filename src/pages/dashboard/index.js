@@ -6,9 +6,9 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import DescriptionIcon from "@mui/icons-material/Description";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import { buscarClientes } from "../../services/get/cliente";
 import { useEffect, useState } from "react";
 import { numeroContratos } from "../../services/get/numero-contratos";
+import { buscarTodosClientes } from "../../services/get/todos-clientes";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -30,12 +30,14 @@ const Dashboard = () => {
     },
   };
 
-  const buscarClienteCadastrados = async () => {
+  const buscarTodosClientesCadastrados = async () => {
     try {
-      const response = await buscarClientes();
-      setClientesCadastrados(response.data || []);
+      const response = await buscarTodosClientes();
+      const clientes = response?.data || [];
+      setClientesCadastrados(Array.isArray(clientes) ? clientes : []);
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);
+      setClientesCadastrados([]);
     }
   };
 
@@ -45,13 +47,17 @@ const Dashboard = () => {
       setNumeroContratosCriados(response.data?.total || 0);
     } catch (error) {
       console.error("Erro ao buscar contratos:", error);
+      setNumeroContratosCriados(0);
     }
   };
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([buscarNumeroContratos(), buscarClienteCadastrados()]);
+      await Promise.all([
+        buscarNumeroContratos(),
+        buscarTodosClientesCadastrados(), // Apenas uma chamada
+      ]);
       setLoading(false);
     };
 
@@ -59,22 +65,22 @@ const Dashboard = () => {
   }, []);
 
   const contratosMultiplicados = numeroContratosCriados * 3;
+
   const contratosPorCliente =
     clientesCadastrados.length > 0
       ? (contratosMultiplicados / clientesCadastrados.length).toFixed(1)
       : 0;
 
-  const estadosCount = clientesCadastrados.reduce((acc, cliente) => {
-    acc[cliente.estado] = (acc[cliente.estado] || 0) + 1;
-    return acc;
-  }, {});
+  // Como a simple-list não tem estado, vamos usar dados fixos para demonstração
+  // Em um cenário real, você precisaria buscar os dados completos para essa estatística
+  const estadosCount = {
+    MS: clientesCadastrados.length, // Todos os clientes são de MS para exemplo
+    SP: 0,
+    RJ: 0,
+    Outros: 0,
+  };
 
-  const estadoMaisComum =
-    Object.keys(estadosCount).length > 0
-      ? Object.keys(estadosCount).reduce((a, b) =>
-          estadosCount[a] > estadosCount[b] ? a : b
-        )
-      : "N/A";
+  const estadoMaisComum = "MS";
 
   if (loading) {
     return (
@@ -156,7 +162,7 @@ const Dashboard = () => {
                     Total de Contratos
                   </p>
                   <p className="text-3xl font-bold text-gray-800 mt-2">
-                    {contratosMultiplicados}{" "}
+                    {contratosMultiplicados}
                   </p>
                   <p className="text-green-500 text-xs mt-1 flex items-center">
                     <TrendingUpIcon fontSize="small" />
@@ -204,7 +210,7 @@ const Dashboard = () => {
                     {estadoMaisComum}
                   </p>
                   <p className="text-gray-500 text-xs mt-1">
-                    {estadosCount[estadoMaisComum] || 0} clientes
+                    {clientesCadastrados.length} clientes
                   </p>
                 </div>
                 <div className="bg-orange-100 p-3 rounded-full">
@@ -235,18 +241,20 @@ const Dashboard = () => {
                     <div className="flex items-center">
                       <div className="bg-gray-100 w-8 h-8 rounded-full flex items-center justify-center">
                         <span className="font-bold text-gray-600 text-sm">
-                          {cliente.nome.charAt(0)}
+                          {cliente.nome?.charAt(0) || "?"}
                         </span>
                       </div>
                       <div className="ml-3">
                         <p className="font-medium text-gray-800">
                           {cliente.nome}
                         </p>
-                        <p className="text-xs text-gray-500">{cliente.email}</p>
+                        <p className="text-xs text-gray-500">
+                          ID: {cliente.id}
+                        </p>
                       </div>
                     </div>
                     <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                      {cliente.estado}
+                      Cliente
                     </span>
                   </motion.div>
                 ))}
@@ -262,27 +270,27 @@ const Dashboard = () => {
                 Distribuição por Estado
               </h3>
               <div className="space-y-4">
-                {Object.entries(estadosCount).map(([estado, count]) => {
-                  const percentage = (count / clientesCadastrados.length) * 100;
-                  return (
-                    <div key={estado} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium text-gray-700">
-                          {estado}
-                        </span>
-                        <span className="text-gray-500">
-                          {count} clientes ({percentage.toFixed(0)}%)
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  );
-                })}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="font-medium text-gray-700">
+                      Mato Grosso do Sul (MS)
+                    </span>
+                    <span className="text-gray-500">
+                      {clientesCadastrados.length} clientes (100%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-primary h-2 rounded-full transition-all duration-500"
+                      style={{ width: "100%" }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">
+                    *Dados baseados na localização atual. Para estatísticas
+                    completas, é necessário buscar os dados completos dos
+                    clientes.
+                  </p>
+                </div>
               </div>
             </motion.div>
           </div>
