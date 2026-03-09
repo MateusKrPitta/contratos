@@ -4,17 +4,19 @@ import CustomToast from "../../components/toast";
 export const atualizarCliente = async (
   id,
   nome,
-  senha,
-  email,
-  permissao,
-  oab,
+  telefone,
+  rg,
+  cnh,
   profissao,
   cpf,
   cep,
   cidade,
   estado,
   rua,
-  numero
+  numero,
+  bairro,
+  numero_contrato,
+  titulos,
 ) => {
   const https = httpsInstance();
   const token = sessionStorage.getItem("token");
@@ -27,10 +29,9 @@ export const atualizarCliente = async (
   try {
     const payload = {
       nome,
-      senha,
-      email,
-      permissao,
-      oab,
+      telefone,
+      rg,
+      cnh,
       profissao,
       cpf,
       cep,
@@ -38,6 +39,9 @@ export const atualizarCliente = async (
       estado,
       rua,
       numero,
+      bairro,
+      numero_contrato,
+      titulos,
     };
 
     const response = await https.put(`/clientes/${id}`, payload, {
@@ -48,11 +52,11 @@ export const atualizarCliente = async (
 
     CustomToast({
       type: "success",
-      message: "Usuário atualizado com sucesso!",
+      message: "Cliente atualizado com sucesso!",
     });
     return response.data;
   } catch (error) {
-    let errorMessage = "Erro ao atualizar usuário.";
+    let errorMessage = "Erro ao atualizar cliente.";
 
     if (error.response?.data?.details) {
       errorMessage = error.response.data.details;

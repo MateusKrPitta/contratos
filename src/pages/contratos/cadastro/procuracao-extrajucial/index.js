@@ -179,10 +179,10 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
 
     
   </div>
-<div style="font-size: 15px; font-family: 'Times'; text-align: justify; ">
+<div style=" margin-left: 20px; margin-right:20px; font-size: 15px; font-family: 'Times'; text-align: justify;  margin-left: 20px; margin-right:20px ">
   <strong>PODERES:</strong> Amplos e ilimitados poderes para representar o Outorgante perante todo e qualquer órgão do <strong>SISTEMA NACIONAL DE TRÂNSITO</strong>, em defesas, recursos, contestação e pedido de reconsideração, em 1ª e 2ª instâncias, em autuações e/ou penalidades relativas à infrações de trânsito e/ou restrição a direitos, registradas nos órgãos acima mencionados, para tanto podendo: pedir e receber cópias de documentos, inclusive de Autos de Infrações Originais e Processos Administrativos; proceder verificações e contestar registro de autos infração de trânsito e penalidades, existentes contra veículos de propriedade ou conduzido pelo(a) Outorgante, protocolizar e providenciar registros para protocolos, verificar e conhecer de fatos e de registros de interesse sobre veículos e condução destes quando se relacione com os interesses do(a) Outorgante, consoante ao <strong>TRÂNSITO LOCAL, ESTADUAL OU NACIONAL</strong>, podendo este mandato ser substabelecida com ou sem reserva de poderes.<strong> Por tais atos o Outorgante, desde já, os tem como firmes e valiosos na forma da Lei.</strong>
 </div>
- <div style="font-size: 14px; font-family: 'Times'; text-align: justify; margin-bottom: 20px;">
+ <div style="  margin-left: 20px; margin-right:20px font-size: 14px; font-family: 'Times'; text-align: justify; margin-bottom: 20px;">
     <strong> DOURADOS MS, ${new Date().toLocaleDateString("pt-BR", {
       day: "numeric",
       month: "long",
@@ -191,16 +191,15 @@ const ProcuracaoExtrajudicial = ({ onConteudoChange, cliente, advogado }) => {
   </div>
 
   <!-- Área da assinatura -->
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; position: relative;">
+  <div style="  margin-left: 20px; margin-right:20px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; position: relative;">
     <!-- Nome e CPF à esquerda -->
     <div style="flex: 1;">
-  <div style="font-size: 14px; font-family: 'Times'; margin-bottom: 15px; position: relative; margin-top:45px">
+<div style="font-size: 14px; display: flex; flex-direction: column; font-family: 'Times'; margin-bottom: 15px; position: relative; margin-top:45px">
     <div style="border-bottom: 1px solid #000; width: 30%; margin-top: 5px;"></div> 
     <strong>NOME: ${cliente?.nome || "NÃO INFORMADO"}</strong>
-  </div>
-  <div style="font-size: 14px; font-family: 'Times'; position: relative;">
     <strong>CPF: ${cliente?.cpf || "NÃO INFORMADO"}</strong>
-  </div>
+</div>
+  
 </div>
     
    

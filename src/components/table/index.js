@@ -20,7 +20,11 @@ import { maskCPF } from "../../utils/mascaras/formatCPF";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
-import { SwapHoriz } from "@mui/icons-material";
+import {
+  ContentCopyOutlined,
+  FileCopyOutlined,
+  SwapHoriz,
+} from "@mui/icons-material";
 import { motion } from "framer-motion";
 
 const TableComponent = ({
@@ -112,7 +116,7 @@ const TableComponent = ({
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
+        selected.slice(selectedIndex + 1),
       );
     }
 
@@ -171,6 +175,24 @@ const TableComponent = ({
           }}
         >
           <VisibilityOutlinedIcon fontSize={"small"} />
+        </IconButton>
+      ),
+      duplicate: (
+        <IconButton
+          onClick={() => actionCalls.duplicate(row)}
+          title="Duplicar Contrato"
+          className="duplicate-button"
+          sx={{
+            color: "#2C5282",
+            border: "1px solid #2C5282",
+            "&:hover": {
+              color: "#fff",
+              backgroundColor: "#2C5282",
+              border: "1px solid #005a2a",
+            },
+          }}
+        >
+          <ContentCopyOutlined fontSize={"small"} />
         </IconButton>
       ),
       edit: (
@@ -335,7 +357,7 @@ const TableComponent = ({
                         label
                       )}
                     </TableCell>
-                  )
+                  ),
               )}
             </TableRow>
           </TableHead>
@@ -378,8 +400,8 @@ const TableComponent = ({
                                 row.Tipo === "Entrada"
                                   ? "#2C5282"
                                   : row.Tipo === "Saída"
-                                  ? "#ed4949"
-                                  : "transparent",
+                                    ? "#ed4949"
+                                    : "transparent",
                               color: "white",
                               fontSize: "12px",
                             }}
@@ -405,7 +427,7 @@ const TableComponent = ({
                           <TableCell style={{ fontSize: "12px" }} key={key}>
                             {row[key] || "-"}
                           </TableCell>
-                        ))
+                        )),
                     )}
                   </TableRow>
                 );

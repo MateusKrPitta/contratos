@@ -28,6 +28,8 @@ const PeticaoDocumentoEditar = ({
   cliente,
   advogado,
   conteudoInicial,
+  tituloSelecionado,
+  numeroContrato,
 }) => {
   const editorRef = useRef(null);
   const [fontFamily, setFontFamily] = useState("Arial");
@@ -58,17 +60,87 @@ const PeticaoDocumentoEditar = ({
 
       setConteudoCarregado(true);
     }
-  }, [conteudoInicial, cliente, advogado, onConteudoChange, conteudoCarregado]);
+  }, [conteudoInicial, cliente, advogado, onConteudoChange]);
 
+  useEffect(() => {
+    if (editorRef.current && conteudoCarregado && tituloSelecionado) {
+      let htmlAtual = editorRef.current.innerHTML;
+
+      let novoHtml = htmlAtual;
+
+      const regexTitulo1 =
+        /<div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">(.*?)<\/div>/;
+
+      const regexTitulo2 =
+        /<div[^>]*?font-size: 16px[^>]*?text-align: center[^>]*?font-weight: bold[^>]*?>(.*?)<\/div>/;
+
+      const regexTitulo3 =
+        /<div[^>]*?text-align: center[^>]*?font-weight: bold[^>]*?margin-bottom: 20px[^>]*?>(.*?)<\/div>/;
+
+      if (novoHtml.match(regexTitulo1)) {
+        novoHtml = novoHtml.replace(regexTitulo1, (match, p1) => {
+          return `<div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">${tituloSelecionado}</div>`;
+        });
+      } else if (novoHtml.match(regexTitulo2)) {
+        novoHtml = novoHtml.replace(regexTitulo2, (match, p1) => {
+          return match.replace(p1, tituloSelecionado);
+        });
+      } else if (novoHtml.match(regexTitulo3)) {
+        novoHtml = novoHtml.replace(regexTitulo3, (match, p1) => {
+          return match.replace(p1, tituloSelecionado);
+        });
+      } else {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = htmlAtual;
+
+        const divs = tempDiv.querySelectorAll("div");
+        for (let div of divs) {
+          const style = div.getAttribute("style") || "";
+          const text = div.textContent || "";
+
+          if (
+            style.includes("text-align: center") &&
+            style.includes("font-weight: bold") &&
+            text.trim().length > 5
+          ) {
+            div.textContent = tituloSelecionado;
+            novoHtml = tempDiv.innerHTML;
+            break;
+          }
+        }
+      }
+
+      if (novoHtml !== htmlAtual) {
+        editorRef.current.innerHTML = novoHtml;
+        setConteudo(novoHtml);
+
+        if (onConteudoChange) {
+          onConteudoChange(novoHtml);
+        }
+      }
+    }
+  }, [tituloSelecionado, conteudoCarregado]);
   const gerarTemplatePadrao = (cliente, advogado) => {
     return `
-<div style="  line-height: 1.5; margin-left: 40px; margin-right:40px;">
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
+<div style="line-height: 1.5; margin-left: 40px; margin-right:40px;">
+  <div style="font-size: 16px; font-family: 'Arial'; text-align: start; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
     ILUSTRÍSSIMO SENHOR DIRETOR PRESIDENTE DO DETRAN/MS
   </div>
   
-  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
+  <div style="font-size: 16px; font-family: 'Arial'; text-align: start; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
     CAMPO GRANDE MS.
+  </div>
+  
+  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; margin-bottom: 20px; text-transform: uppercase;">
+    ${tituloSelecionado || "DEFESA PRÉVIA EM PROCESSO DE SUSPENSÃO DO DIREITO DE DIRIGIR - FASE DE INSTAURAÇÃO"}
+  </div>
+  
+  <div style="font-size: 16px; font-family: 'Arial'; text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 20px;">
+    PROCESSO Nº: ${numeroContrato || "016189/2025"}
+  </div>
+  
+  <div style="font-size: 16px; font-family: 'Arial'; text-align: start; font-weight: bold; text-decoration: underline; margin-bottom: 20px;">
+    QUALIFICAÇÃO DO REQUERENTE
   </div>
   
   <table style="width: 100%; font-family: 'Times New Roman, sans-serif !important'; border-collapse: collapse; margin-bottom: 20px; border: 1px solid black;">
@@ -82,13 +154,66 @@ const PeticaoDocumentoEditar = ({
         cliente?.cpf || "CPF DO CLIENTE"
       }</td>
     </tr>
+    <tr>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CNH Nº:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.cnh || "NÃO INFORMADO"
+      }</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">RG/UF:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.rg || "NÃO INFORMADO"
+      }</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">ENDEREÇO:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.rua || "NÃO INFORMADO"
+      }</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">Nº:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.numero || "NÃO INFORMADO"
+      }</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">BAIRRO:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.bairro || "NÃO INFORMADO"
+      }</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CEP:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.cep || "NÃO INFORMADO"
+      }</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CIDADE/UF:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.cidade || "NÃO INFORMADO"
+      }</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px; font-weight: bold;">CELULAR:</td>
+      <td style="border: 1px solid black; font-size: 12px; padding: 5px;">${
+        cliente?.telefone || "NÃO INFORMADO"
+      }</td>
+    </tr>
   </table>
   
   <div style="font-family: 'Arial'; font-size: 16px; text-align: center; margin-bottom: 16px;">
-    PP. ${advogado?.nome || "NOME DO ADVOGADO"}
+    Dourados- MS, ${new Date().toLocaleDateString("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })}.
   </div>
+  
+  <div style="font-family: 'Arial'; font-size: 16px; text-align: center; margin-bottom: 16px; margin-top:50px">
+    ______________________________________
+  </div>
+
   <div style="font-family: 'Arial'; font-size: 16px; text-align: center; margin-bottom: 16px;">
-    OAB/MS ${advogado?.oab || "NÚMERO OAB"}
+    PP. ${advogado?.nome || "ADVOGADO"}
+  </div>
+  
+  <div style="font-family: 'Arial'; font-size: 16px; text-align: center; margin-bottom: 16px;">
+    OAB/MS ${advogado?.oab || "000.000"}
   </div>
 </div>`;
   };

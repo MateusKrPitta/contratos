@@ -14,5 +14,14 @@ export const cadastrosCliente = (clientes) => {
     estado: cliente.estado,
     numero: cliente.numero,
     cnh: cliente.cnh,
+    numeroContrato: cliente.numeroContrato,
+    titulos:
+      cliente.titulos &&
+      Array.isArray(cliente.titulos) &&
+      cliente.titulos.length > 0
+        ? cliente.titulos.join(", ")
+        : "-",
+    titulosArray:
+      cliente.titulos && Array.isArray(cliente.titulos) ? cliente.titulos : [],
   }));
 };

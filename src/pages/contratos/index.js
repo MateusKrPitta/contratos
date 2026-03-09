@@ -44,6 +44,7 @@ import { deletarContrato } from "../../services/delete/contrato";
 import { buscarContratosAdvogado } from "../../services/get/busca-contratos-id-advogado";
 import { buscarTodosClientes } from "../../services/get/todos-clientes";
 import { buscarClientesId } from "../../services/get/cliente-id";
+import { duplicarContrato } from "../../services/post/duplica-contrato";
 
 const Contratos = () => {
   const [loading, setLoading] = useState(false);
@@ -62,7 +63,9 @@ const Contratos = () => {
   const [peticaoHtml, setPeticaoHtml] = useState("");
   const [contratoHtml, setContratoHtml] = useState("");
   const [procuracaoHtml, setProcuracaoHtml] = useState("");
+  const [tituloOriginal, setTituloOriginal] = useState("");
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
+  const [titulosDisponiveis, setTitulosDisponiveis] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [contratosCadastrados, setContratosCadastrados] = useState([]);
   const [clienteDetalhado, setClienteDetalhado] = useState(null);
@@ -108,6 +111,7 @@ const Contratos = () => {
   const buscarDetalhesCliente = useCallback(async (clienteId) => {
     if (!clienteId) {
       setClienteDetalhado(null);
+      setTitulosDisponiveis([]);
       return;
     }
 
@@ -115,13 +119,26 @@ const Contratos = () => {
       const response = await buscarClientesId(clienteId);
       const clienteData = response?.data?.data || response?.data;
       setClienteDetalhado(clienteData);
+
+      // Extrair os títulos do cliente
+      if (clienteData?.titulos && Array.isArray(clienteData.titulos)) {
+        console.log("6. Títulos carregados do cliente:", clienteData.titulos);
+        setTitulosDisponiveis(clienteData.titulos);
+      } else {
+        console.log("6. Cliente não tem títulos");
+        setTitulosDisponiveis([]);
+      }
+
+      return clienteData;
     } catch (error) {
       console.error("Erro ao buscar detalhes do cliente:", error);
       setClienteDetalhado(null);
+      setTitulosDisponiveis([]);
       CustomToast({
         type: "error",
         message: "Erro ao carregar detalhes do cliente.",
       });
+      throw error;
     }
   }, []);
 
@@ -136,7 +153,27 @@ const Contratos = () => {
       setClientesCadastrados([]);
     }
   };
+  useEffect(() => {
+    if (clienteSelecionado && titulosDisponiveis.length > 0 && tituloOriginal) {
+      console.log("7. Titulos disponíveis:", titulosDisponiveis);
+      console.log("8. Título original:", tituloOriginal);
 
+      // Verifica se o título original está na lista de títulos disponíveis
+      const tituloExiste = titulosDisponiveis.includes(tituloOriginal);
+      console.log("9. Título original existe na lista?", tituloExiste);
+
+      if (tituloExiste) {
+        console.log("10. Setando título original:", tituloOriginal);
+        setTituloContrato(tituloOriginal);
+      } else if (titulosDisponiveis.length > 0) {
+        console.log(
+          "10. Título original não encontrado, setando primeiro título:",
+          titulosDisponiveis[0],
+        );
+        setTituloContrato(titulosDisponiveis[0]);
+      }
+    }
+  }, [clienteSelecionado, titulosDisponiveis, tituloOriginal]);
   const buscarContratosAdvogadoLogado = useCallback(
     async (page = 1, perPage = 5) => {
       try {
@@ -383,18 +420,32 @@ const Contratos = () => {
   );
 
   const handleAtualizarContrato = async () => {
+    console.log("12. Título que será enviado:", tituloContrato);
+    console.log("13. Dados completos para atualização:", {
+      id: contratoSelecionado?.id,
+      clienteId: clienteSelecionado,
+      advogadoId: advogadoSelecionado,
+      titulo: tituloContrato,
+      numeroContrato: contratoSelecionado?.numeroContrato,
+      procuracaoHtml: procuracaoHtml ? "presente" : "vazio",
+      contratoHtml: contratoHtml ? "presente" : "vazio",
+      peticaoHtml: peticaoHtml ? "presente" : "vazio",
+    });
+
     setLoading(true);
     try {
       await atualizarContrato(
         contratoSelecionado.id,
         clienteSelecionado,
         advogadoSelecionado,
-        tituloContrato || contratoSelecionado.titulo,
+        tituloContrato,
         contratoSelecionado.numeroContrato || `CTR-${Date.now()}`,
         procuracaoHtml,
         contratoHtml,
         peticaoHtml,
       );
+
+      console.log("14. Contrato atualizado com sucesso!");
 
       await buscarContratosAdvogadoLogado(
         paginacao.paginaAtual,
@@ -408,7 +459,7 @@ const Contratos = () => {
 
       FecharEditarContrato();
     } catch (error) {
-      console.error("Erro ao atualizar contrato:", error);
+      console.error("15. Erro ao atualizar contrato:", error);
       CustomToast({
         type: "error",
         message: "Erro ao atualizar contrato. Tente novamente.",
@@ -418,21 +469,35 @@ const Contratos = () => {
     }
   };
 
+  useEffect(() => {
+    console.log("15. tituloContrato foi atualizado:", tituloContrato);
+  }, [tituloContrato]);
   const handleEditarContrato = (contrato) => {
+    console.log("1. Contrato recebido para edição:", contrato);
+    console.log("2. Título do contrato:", contrato.titulo);
+
     setContratoSelecionado(contrato);
     setEditarContrato(true);
 
     const clienteId = contrato.clienteId || contrato.clienteInfo?.id || "";
     setClienteSelecionado(clienteId);
 
+    // Guarda o título original
+    const tituloAtual = contrato.titulo || "";
+    setTituloOriginal(tituloAtual);
+    console.log("3. Título original salvo:", tituloAtual);
+
+    // IMPORTANTE: Primeiro buscar os detalhes do cliente para carregar os títulos
     if (clienteId) {
-      buscarDetalhesCliente(clienteId);
+      console.log("4. Buscando detalhes do cliente ID:", clienteId);
+      buscarDetalhesCliente(clienteId).then(() => {
+        console.log("5. Detalhes do cliente carregados");
+      });
     }
 
     setAdvogadoSelecionado(
       contrato.advogadoId || contrato.advogadoInfo?.id || "",
     );
-    setTituloContrato(contrato.titulo || "");
 
     setPeticaoHtml(contrato.peticaoHtml || "");
     setContratoHtml(contrato.honorarioHtml || "");
@@ -453,6 +518,7 @@ const Contratos = () => {
     setContratoHtml("");
     setProcuracaoHtml("");
     setClienteDetalhado(null);
+    setTitulosDisponiveis([]); // Adicione esta linha
   };
 
   const FecharEditarContrato = () => {
@@ -462,10 +528,12 @@ const Contratos = () => {
     setClienteSelecionado("");
     setAdvogadoSelecionado("");
     setTituloContrato("");
+    setTituloOriginal("");
     setPeticaoHtml("");
     setContratoHtml("");
     setProcuracaoHtml("");
-    setClienteDetalhado(null); // Adicione esta linha
+    setClienteDetalhado(null);
+    setTitulosDisponiveis([]);
   };
 
   const handleCadastrarContrato = async () => {
@@ -567,6 +635,18 @@ const Contratos = () => {
     }
   };
 
+  const handleDuplicarContrato = async (contrato) => {
+    try {
+      await duplicarContrato(contrato.id);
+      await buscarContratosAdvogadoLogado(
+        paginacao.paginaAtual,
+        paginacao.itensPorPagina,
+      );
+    } catch (error) {
+      console.error("Erro ao duplicar contrato:", error);
+    }
+  };
+
   const handleStepClickEdicao = (stepIndex) => {
     if (stepIndex <= etapaAtivaEdicao) {
       setEtapaAtivaEdicao(stepIndex);
@@ -592,6 +672,7 @@ const Contratos = () => {
               }
               onChange={(event, newValue) => {
                 setClienteSelecionado(newValue ? newValue.id : "");
+                setTituloContrato("");
               }}
               getOptionLabel={(option) =>
                 `${option.nome} - ${option.cpf || option.email || ""}`
@@ -637,15 +718,30 @@ const Contratos = () => {
               </Select>
             </FormControl>
 
-            <TextField
-              fullWidth
-              size="small"
-              label="Título do Contrato"
-              value={tituloContrato}
-              onChange={(e) => setTituloContrato(e.target.value)}
-              placeholder="Ex: Contrato de Prestação de Serviços Jurídicos"
-              sx={{ mb: 2 }}
-            />
+            {/* Campo de título alterado para Select */}
+            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+              <InputLabel>Título do Contrato</InputLabel>
+              <Select
+                value={tituloContrato}
+                label="Título do Contrato"
+                onChange={(e) => setTituloContrato(e.target.value)}
+                disabled={
+                  !clienteSelecionado || titulosDisponiveis.length === 0
+                }
+              >
+                {titulosDisponiveis.length > 0 ? (
+                  titulosDisponiveis.map((titulo, index) => (
+                    <MenuItem key={index} value={titulo}>
+                      {titulo}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled value="">
+                    <em>Nenhum título disponível para este cliente</em>
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
 
             {clienteDetalhado && (
               <div className="w-full p-3 bg-gray-50 rounded-md mt-2">
@@ -664,7 +760,6 @@ const Contratos = () => {
                     <strong>RG:</strong>{" "}
                     {clienteDetalhado.rg || "Não informado"}
                   </p>
-
                   <p>
                     <strong>Telefone:</strong>{" "}
                     {clienteDetalhado.telefone || "Não informado"}
@@ -674,7 +769,6 @@ const Contratos = () => {
             )}
           </div>
         );
-
       case 1:
         return (
           <div className="mt-4">
@@ -682,6 +776,8 @@ const Contratos = () => {
               onConteudoChange={setPeticaoHtml}
               cliente={clienteDetalhado}
               advogado={usuariosArray.find((a) => a.id === advogadoSelecionado)}
+              tituloSelecionado={tituloContrato}
+              numeroContrato={clienteDetalhado?.numeroContrato}
             />
           </div>
         );
@@ -742,21 +838,31 @@ const Contratos = () => {
       case 0:
         return (
           <div className="mt-4 flex gap-3 flex-wrap">
-            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-              <InputLabel>Cliente</InputLabel>
-              <Select
-                value={clienteSelecionado}
-                label="Cliente"
-                onChange={(e) => setClienteSelecionado(e.target.value)}
-                disabled={modoEdicao}
-              >
-                {clientesArray.map((cliente) => (
-                  <MenuItem key={cliente.id} value={cliente.id}>
-                    {cliente.nome} - {cliente.cpf || cliente.email}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              fullWidth
+              size="small"
+              options={clientesArray}
+              value={
+                clientesArray.find((c) => c.id === clienteSelecionado) || null
+              }
+              onChange={(event, newValue) => {
+                setClienteSelecionado(newValue ? newValue.id : "");
+                // Resetar o título quando mudar de cliente
+                setTituloContrato("");
+              }}
+              getOptionLabel={(option) =>
+                `${option.nome} - ${option.cpf || option.email || ""}`
+              }
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Cliente"
+                  placeholder="Digite o nome do cliente..."
+                />
+              )}
+              sx={{ mb: 2 }}
+            />
 
             <FormControl fullWidth size="small" sx={{ mb: 2 }}>
               <InputLabel>Advogado</InputLabel>
@@ -764,37 +870,56 @@ const Contratos = () => {
                 value={advogadoSelecionado}
                 label="Advogado"
                 onChange={(e) => setAdvogadoSelecionado(e.target.value)}
-                disabled={modoEdicao}
               >
                 {usuariosArray.map((usuario) => {
-                  const isCurrent = usuario.id === advogadoSelecionado;
+                  const isUsuarioLogado =
+                    usuario.id === (usuarioLogado?.id || null);
                   return (
                     <MenuItem
                       key={usuario.id}
                       value={usuario.id}
                       style={{
-                        fontWeight: isCurrent ? "bold" : "normal",
-                        backgroundColor: isCurrent ? "#e8f5e8" : "transparent",
+                        fontWeight: isUsuarioLogado ? "bold" : "normal",
+                        backgroundColor: isUsuarioLogado
+                          ? "#e8f5e8"
+                          : "transparent",
                       }}
                     >
                       {usuario.nome} -{" "}
                       {usuario.oab ? `OAB: ${usuario.oab}` : "Sem OAB"}
-                      {isCurrent && " (Atual)"}
+                      {isUsuarioLogado && " (Você)"}
                     </MenuItem>
                   );
                 })}
               </Select>
             </FormControl>
 
-            <TextField
-              fullWidth
-              size="small"
-              label="Título do Contrato"
-              value={tituloContrato}
-              onChange={(e) => setTituloContrato(e.target.value)}
-              placeholder="Ex: Contrato de Prestação de Serviços Jurídicos"
-              sx={{ mb: 2 }}
-            />
+            <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+              <InputLabel>Título do Contrato</InputLabel>
+              <Select
+                value={tituloContrato}
+                label="Título do Contrato"
+                onChange={(e) => {
+                  console.log("11. Novo título selecionado:", e.target.value);
+                  setTituloContrato(e.target.value);
+                }}
+                disabled={
+                  !clienteSelecionado || titulosDisponiveis.length === 0
+                }
+              >
+                {titulosDisponiveis.length > 0 ? (
+                  titulosDisponiveis.map((titulo, index) => (
+                    <MenuItem key={index} value={titulo}>
+                      {titulo}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled value="">
+                    <em>Nenhum título disponível para este cliente</em>
+                  </MenuItem>
+                )}
+              </Select>
+            </FormControl>
 
             {clienteDetalhado && (
               <div className="w-full p-3 bg-gray-50 rounded-md mt-2">
@@ -831,6 +956,11 @@ const Contratos = () => {
               cliente={clienteDetalhado}
               advogado={usuariosArray.find((a) => a.id === advogadoSelecionado)}
               conteudoInicial={contratoSelecionado?.peticaoHtml || ""}
+              tituloSelecionado={tituloContrato} // Já deve estar usando o estado atualizado
+              numeroContrato={
+                clienteDetalhado?.numeroContrato ||
+                contratoSelecionado?.numeroContrato
+              }
             />
           </div>
         );
@@ -996,6 +1126,7 @@ const Contratos = () => {
                     rows={cadastrosContratos(contratosCadastrados)}
                     actionsLabel={"Ações"}
                     actionCalls={{
+                      duplicate: (row) => handleDuplicarContrato(row),
                       edit: (row) => handleEditarContrato(row),
                       delete: (row) => handleExcluirContrato(row),
                     }}

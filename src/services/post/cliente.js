@@ -14,6 +14,8 @@ export const criarCliente = async (
   rua,
   numero,
   bairro,
+  numero_contrato,
+  titulos,
 ) => {
   const https = httpsInstance();
   const token = sessionStorage.getItem("token");
@@ -35,6 +37,8 @@ export const criarCliente = async (
       rua,
       numero,
       bairro,
+      numero_contrato,
+      titulos,
     };
 
     const response = await https.post("/clientes", payload, {

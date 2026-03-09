@@ -14,8 +14,21 @@ import {
   Numbers,
   Phone,
   Work,
+  CheckBox,
+  CheckBoxOutlineBlank,
+  Add,
+  Close,
+  Label,
 } from "@mui/icons-material";
-import { InputAdornment, TextField } from "@mui/material";
+import {
+  InputAdornment,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Chip,
+  Box,
+  IconButton,
+} from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import SearchIcon from "@mui/icons-material/Search";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -57,10 +70,16 @@ const Cliente = () => {
   const [bairro, setBairro] = useState("");
   const [nomeCompleto, setNomeCompleto] = useState("");
   const [senha, setSenha] = useState("");
+  const [numero_contrato, setNumeroContrato] = useState("");
   const [pagina, setPagina] = useState(1);
   const [itensPorPagina, setItensPorPagina] = useState(10);
   const [totalItens, setTotalItens] = useState(0);
   const [ultimaBusca, setUltimaBusca] = useState("");
+
+  // Novos estados
+  const [contrato, setContrato] = useState(false);
+  const [titulos, setTitulos] = useState([]);
+  const [tituloInput, setTituloInput] = useState("");
 
   const [clientesCadastrados, setClientesCadastrados] = useState([]);
 
@@ -88,6 +107,7 @@ const Cliente = () => {
     setClienteEditando(null);
     setNomeCompleto("");
     setSenha("");
+    setNumeroContrato("");
     setUsername("");
     setTelefone("");
     setPermissao(null);
@@ -101,6 +121,9 @@ const Cliente = () => {
     setCnh("");
     setProfissao("");
     setBairro("");
+    setContrato(false);
+    setTitulos([]);
+    setTituloInput("");
     inputRefs.current = [];
   };
 
@@ -113,6 +136,15 @@ const Cliente = () => {
     setCpf(usuario.cpf || "");
     setCep(usuario.cep || "");
     setCidade(usuario.cidade || "");
+    setNumeroContrato(usuario.numeroContrato || "");
+    setContrato(usuario.contrato || false);
+
+    const titulosArray = Array.isArray(usuario.titulosArray)
+      ? usuario.titulosArray
+      : [];
+
+    setTitulos(titulosArray);
+
     setEstado(usuario.estado || "");
     setRua(usuario.rua || "");
     setNumero(usuario.numero || "");
@@ -141,7 +173,29 @@ const Cliente = () => {
     setCnh("");
     setProfissao("");
     setBairro("");
+    setContrato(false);
+    setTitulos([]);
+    setTituloInput("");
     inputRefs.current = [];
+  };
+
+  // Funções para gerenciar títulos
+  const handleAdicionarTitulo = () => {
+    if (tituloInput.trim() !== "") {
+      setTitulos([...titulos, tituloInput.trim()]);
+      setTituloInput("");
+    }
+  };
+
+  const handleRemoverTitulo = (indexToRemove) => {
+    setTitulos(titulos.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleKeyDownTitulo = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleAdicionarTitulo();
+    }
   };
 
   const handleCadastrarUsuario = async () => {
@@ -149,23 +203,23 @@ const Cliente = () => {
       setLoading(true);
       try {
         const response = await criarCliente(
-          nomeCompleto,
-          telefone,
-          rg,
-          cnh,
-          profissao,
-          cpf,
-          cep,
-          cidade,
-          estado,
-          rua,
-          numero,
-          bairro,
+          nomeCompleto, // 1º - nome
+          telefone, // 2º - telefone
+          rg, // 3º - rg
+          cnh, // 4º - cnh
+          profissao, // 5º - profissao
+          cpf, // 6º - cpf
+          cep, // 7º - cep
+          cidade, // 8º - cidade
+          estado, // 9º - estado
+          rua, // 10º - rua
+          numero, // 11º - numero
+          bairro, // 12º - bairro
+          numero_contrato, // 13º - numero_contrato (AGORA NA POSIÇÃO CORRETA)
+          titulos, // 14º - titulos
         );
 
-        // Buscar clientes novamente para atualizar a tabela
         await buscarClienteCadastrados(pagina, pesquisar);
-
         FecharCadastro();
       } catch (error) {
         console.error("Erro ao cadastrar cliente:", error);
@@ -174,17 +228,20 @@ const Cliente = () => {
       }
     }
   };
-
   const handleSalvarEdicao = async () => {
     if (validarCamposEdicao() && clienteEditando) {
       setLoading(true);
       try {
+        const telefoneValue = telefone.trim() !== "" ? telefone : null;
+        const rgValue = rg.trim() !== "" ? rg : null;
+        const cnhValue = cnh.trim() !== "" ? cnh : null;
+
         const response = await atualizarCliente(
           clienteEditando.id,
           nomeCompleto,
-          "", // username
-          "", // senha
-          "", // permissao
+          telefoneValue, // Envia null se estiver vazio
+          rgValue, // Envia null se estiver vazio
+          cnhValue, // Envia null se estiver vazio
           profissao,
           cpf,
           cep,
@@ -193,11 +250,11 @@ const Cliente = () => {
           rua,
           numero,
           bairro,
+          numero_contrato,
+          titulos,
         );
 
-        // Buscar clientes novamente para atualizar a tabela
         await buscarClienteCadastrados(pagina, pesquisar);
-
         handleCloseEdicao();
       } catch (error) {
         console.error("Erro ao atualizar cliente:", error);
@@ -237,7 +294,9 @@ const Cliente = () => {
   const validarCamposEdicao = () => {
     return (
       nomeCompleto.trim() !== "" &&
-      telefone.trim() !== "" &&
+      telefone.trim() !== "" && // TELEFONE OBRIGATÓRIO
+      rg.trim() !== "" && // RG OBRIGATÓRIO
+      cnh.trim() !== "" && // CNH OBRIGATÓRIA
       cpf.trim() !== "" &&
       cep.trim() !== "" &&
       cidade.trim() !== "" &&
@@ -509,6 +568,7 @@ const Cliente = () => {
                         ),
                       }}
                     />
+
                     <TextField
                       inputRef={(el) => registerInput(10, el)}
                       onKeyDown={handleKeyDown(10)}
@@ -667,6 +727,86 @@ const Cliente = () => {
                         ),
                       }}
                     />
+                    <TextField
+                      inputRef={(el) => registerInput(13, el)}
+                      onKeyDown={handleKeyDown(13)}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      label="Número do Contrato"
+                      name="numero_contrato"
+                      value={numero_contrato}
+                      onChange={(e) => setNumeroContrato(e.target.value)}
+                      placeholder="Ex: CT-2024-001"
+                      autoComplete="off"
+                      sx={{
+                        width: { xs: "47%", sm: "50%", md: "40%", lg: "50%" },
+                      }}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <AssignmentIcon />
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+
+                    {/* NOVO: Campo Títulos com sistema de adicionar/remover */}
+                    <Box sx={{ width: "100%", mb: 2 }}>
+                      <label className="text-sm text-gray-600 mb-1 block">
+                        Títulos do Cliente
+                      </label>
+                      <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+                        <TextField
+                          fullWidth
+                          variant="outlined"
+                          size="small"
+                          placeholder="Digite um título"
+                          value={tituloInput}
+                          onChange={(e) => setTituloInput(e.target.value)}
+                          onKeyDown={handleKeyDownTitulo}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Label />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                        <ButtonComponent
+                          startIcon={<Add fontSize="small" />}
+                          title={"Adicionar"}
+                          subtitle={"Adicionar"}
+                          buttonSize="medium"
+                          onClick={handleAdicionarTitulo}
+                          disabled={!tituloInput.trim()}
+                        />
+                      </Box>
+
+                      <label className="text-xs w-full text-primary">
+                        Titulos Adicionados:
+                      </label>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: 1,
+                          mt: 1,
+                        }}
+                      >
+                        {titulos.map((titulo, index) => (
+                          <Chip
+                            key={index}
+                            label={titulo}
+                            onDelete={() => handleRemoverTitulo(index)}
+                            deleteIcon={<Close />}
+                            color="primary"
+                            variant="outlined"
+                            size="small"
+                          />
+                        ))}
+                      </Box>
+                    </Box>
                   </div>
 
                   <div className="flex w-[100%] items-end justify-end mt-2 ">
@@ -730,6 +870,7 @@ const Cliente = () => {
                         width="49%"
                         autoComplete="off"
                       />
+
                       <TextField
                         inputRef={(el) => registerInput(3, el)}
                         onKeyDown={handleKeyDown(3)}
@@ -750,6 +891,7 @@ const Cliente = () => {
                           ),
                         }}
                       />
+
                       <MaskedFieldCpf
                         inputRef={(el) => registerInput(4, el)}
                         onKeyDown={handleKeyDown(4)}
@@ -763,6 +905,7 @@ const Cliente = () => {
                         width="49%"
                         autoComplete="off"
                       />
+
                       <TextField
                         inputRef={(el) => registerInput(5, el)}
                         onKeyDown={handleKeyDown(5)}
@@ -804,6 +947,31 @@ const Cliente = () => {
                           startAdornment: (
                             <InputAdornment position="start">
                               <Numbers />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+
+                      {/* NÚMERO DO CONTRATO - UMA ÚNICA VEZ */}
+                      <TextField
+                        inputRef={(el) => registerInput(13, el)}
+                        onKeyDown={handleKeyDown(13)}
+                        fullWidth
+                        variant="outlined"
+                        size="small"
+                        label="Número do Contrato"
+                        name="numero_contrato"
+                        value={numero_contrato}
+                        onChange={(e) => setNumeroContrato(e.target.value)}
+                        placeholder="Ex: CT-2024-001"
+                        autoComplete="off"
+                        sx={{
+                          width: { xs: "47%", sm: "50%", md: "40%", lg: "49%" },
+                        }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <AssignmentIcon />
                             </InputAdornment>
                           ),
                         }}
@@ -937,6 +1105,100 @@ const Cliente = () => {
                           ),
                         }}
                       />
+
+                      {/* SEÇÃO DE TÍTULOS - Única e Correta */}
+                      {/* SEÇÃO DE TÍTULOS - Corrigida */}
+                      <Box sx={{ width: "100%", mb: 2 }}>
+                        <label className="text-sm text-gray-600 mb-1 block">
+                          Títulos do Cliente
+                        </label>
+
+                        {/* Campo para adicionar novo título */}
+                        <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                          <TextField
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            placeholder="Digite um título"
+                            value={tituloInput}
+                            onChange={(e) => setTituloInput(e.target.value)}
+                            onKeyDown={handleKeyDownTitulo}
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Label />
+                                </InputAdornment>
+                              ),
+                            }}
+                          />
+                          <ButtonComponent
+                            startIcon={<Add fontSize="small" />}
+                            title={"Adicionar"}
+                            subtitle={"Adicionar"}
+                            buttonSize="medium"
+                            onClick={handleAdicionarTitulo}
+                            disabled={!tituloInput.trim()}
+                          />
+                        </Box>
+
+                        {/* Container dos chips com scroll horizontal se necessário */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 1,
+                            minHeight: "40px",
+                            p: 1,
+                            border: "1px solid #e0e0e0",
+                            borderRadius: 1,
+                            bgcolor: "#f5f5f5",
+                            maxWidth: "100%",
+                          }}
+                        >
+                          {titulos && titulos.length > 0 ? (
+                            titulos.map((titulo, index) => (
+                              <Chip
+                                key={`${titulo}-${index}`}
+                                label={titulo}
+                                onDelete={() => {
+                                  handleRemoverTitulo(index);
+                                }}
+                                deleteIcon={<Close />}
+                                color="primary"
+                                variant="outlined"
+                                size="small"
+                                sx={{
+                                  "& .MuiChip-deleteIcon": {
+                                    color: "#ef5350",
+                                    "&:hover": {
+                                      color: "#d32f2f",
+                                    },
+                                  },
+                                }}
+                              />
+                            ))
+                          ) : (
+                            <span className="text-gray-400 text-sm w-full text-center py-1">
+                              Nenhum título adicionado
+                            </span>
+                          )}
+                        </Box>
+
+                        {/* Contador de títulos */}
+                        {titulos && titulos.length > 0 && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              mt: 1,
+                            }}
+                          >
+                            <label className="text-xs text-primary">
+                              {titulos.length} título(s) adicionado(s)
+                            </label>
+                          </Box>
+                        )}
+                      </Box>
                     </div>
 
                     <div className="flex w-[100%] items-end justify-end mt-2 ">
